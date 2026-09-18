@@ -369,6 +369,10 @@ namespace DSAnimStudio.TaeEditor
 
 
         public string ToolExportAnims_LastDestinationPathUsed = "";
+        // Folder holding the Havok Content Tools installation used by the native
+        // cloth/rigid-body preview. Only read when DSA_HAVOK_CONTENT_TOOLS is not
+        // set, so an environment variable still wins.
+        public string HavokContentToolsPath = "";
 
         public List<ImguiOSD.WindowOpenStateEntry> WindowOpenStateEntries { get; set; } = new List<WindowOpenStateEntry>();
 
