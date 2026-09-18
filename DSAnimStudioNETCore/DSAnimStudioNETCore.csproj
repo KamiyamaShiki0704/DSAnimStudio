@@ -1,5 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <Compile Include="..\NativePhysicsHost\NativePhysicsProtocol.cs" Link="NativePhysicsProtocol.cs" />
+  </ItemGroup>
+  <Target Name="BuildNativePhysicsHost" AfterTargets="Build" Condition="'$(OS)' == 'Windows_NT'">
+    <MakeDir Directories="$(TargetDir)NativePhysics" />
+    <Exec Command="&quot;$(WINDIR)\Microsoft.NET\Framework64\v4.0.30319\csc.exe&quot; /nologo /unsafe /platform:x64 /optimize+ /r:System.Windows.Forms.dll /r:System.Drawing.dll /out:&quot;$(TargetDir)NativePhysics\DSA.NativePhysicsHost.exe&quot; &quot;$(MSBuildProjectDirectory)\..\NativePhysicsHost\NativePhysicsHost.cs&quot; &quot;$(MSBuildProjectDirectory)\..\NativePhysicsHost\NativePhysicsProtocol.cs&quot; &quot;$(MSBuildProjectDirectory)\..\NativePhysicsHost\NativeUserBuffers.cs&quot; &quot;$(MSBuildProjectDirectory)\..\NativePhysicsHost\NativeRigidBodies.cs&quot;" />
+  </Target>
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows7.0</TargetFramework>
@@ -38,6 +45,10 @@
     <None Remove="EmbRes\imgui_default_Legacy.ini" />
     <None Remove="EmbRes\imgui_default_V5.ini" />
     <EmbeddedResource Include="EmbRes\Help.txt" />
+    <EmbeddedResource Include="EmbRes\BulletLayouts.json" />
+    <EmbeddedResource Include="EmbRes\MagicLayouts.json" />
+    <None Update="Res\FxrPreview\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Res\FxrRuntime\**\*" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="EmbRes\imgui_default_Legacy.ini" />
     <EmbeddedResource Include="EmbRes\imgui_default_V5.ini" />
     <None Update="Content\Cubemaps\DefaultCubemap.dds">
@@ -473,6 +484,9 @@
     <None Update="Res\IngameReload_ER.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Res\IngameReload_ERNR.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Res\PEM\AC6\data0.pem">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -835,6 +849,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="EmbRes\FxrPreview.mgfxo" />
     <EmbeddedResource Include="EmbRes\InternalSimulationTemplate.xml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using SoulsAssetPipeline;
 
@@ -33,7 +33,8 @@ namespace DSAnimStudio
                         var ds2Meme = $"a{CategoryID:D3}_{SubID:D6}";
                         ds2Meme.Insert(ds2Meme.Length - 4, "_");
                         return ds2Meme;
-                    default: throw new NotImplementedException();
+                    // [Preview] 同 GetFullID —— Unknown 分支按 aXXX_YYYYYY 兜底，避免 UI 闪退
+                    default: return $"a{CategoryID:D3}_{SubID:D6}";
                 }
             }
 
@@ -93,7 +94,15 @@ namespace DSAnimStudio
                 case zzz_GameRootIns.AnimIDFormattingType.aXXX_YYYYYY:
                 case zzz_GameRootIns.AnimIDFormattingType.aXX_YY_ZZZZ: 
                     return (CategoryID * 1_000000) + (SubID % 1_000000);
-                default: throw new NotImplementedException();
+                // [Preview] AnimIDFormattingType.Unknown 分支 —— 原代码抛 NotImplementedException 导致
+                // 加载 c0000.anibnd.dcx 时直接崩溃。出现 Unknown 的场景包括：
+                //   1. GameType 还没被 Init 完成（race condition 在 Update 线程里被 TaeEditor 触碰）
+                //   2. GameType 被设为了 SoulsGames.None（加载前闪退）
+                //   3. 传了 forceGame 但对应游戏没在 GetAnimIDFormattingType 里有 case
+                // 这里按 aXXX_YYYYYY 约定兜底（ERNR/ER/AC6/SDT/DS3/BB 都用这个，是 2015+ 新作的通用格式）。
+                // 不再 throw 是为了让 UI 能继续加载；如果真是 DS1/DS2 这种旧格式，animID 显示会错位但不闪退。
+                default:
+                    return (CategoryID * 1_000000) + (SubID % 1_000000);
             }
         }
 
@@ -113,7 +122,8 @@ namespace DSAnimStudio
                     var ds2Meme = $"a{CategoryID:D3}_{SubID:D6}";
                     ds2Meme.Insert(ds2Meme.Length - 4, "_");
                     return ds2Meme;
-                default: throw new NotImplementedException();
+                // [Preview] 同 GetFullID —— Unknown 分支按 aXXX_YYYYYY 兜底，避免 UI 闪退
+                default: return $"a{CategoryID:D3}_{SubID:D6}";
             }
         }
 

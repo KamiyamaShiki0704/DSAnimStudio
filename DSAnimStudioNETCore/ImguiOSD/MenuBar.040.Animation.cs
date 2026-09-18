@@ -44,6 +44,11 @@ namespace DSAnimStudio.ImguiOSD
                 Tae.Config.EnableAnimRootMotion = Checkbox(
                     "Enable Root Motion", Tae.Config.EnableAnimRootMotion);
 
+                // [Preview] Live root motion XYZ displacement readout.
+                DoWindow(OSD.WindowRootMotion);
+                Main.HelperDraw.EnableRootMotionDistanceText = Checkbox(
+                    "Root Motion Distance Text (Viewport)", Main.HelperDraw.EnableRootMotionDistanceText);
+
                 Tae.Config.RootMotionTranslationMultiplierXZ = FloatSlider("Root Motion Translation Mult XZ",
                     Tae.Config.RootMotionTranslationMultiplierXZ, 0, 20, "%.2f");
                 if (ImGui.IsItemActive())

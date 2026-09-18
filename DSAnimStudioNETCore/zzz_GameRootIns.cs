@@ -1,4 +1,4 @@
-﻿using SoulsAssetPipeline;
+using SoulsAssetPipeline;
 using SoulsAssetPipeline.Animation;
 using SoulsFormats;
 using System;
@@ -76,6 +76,19 @@ namespace DSAnimStudio
                 result.Add("/chr/c0000_dlc01.anibnd.dcx");
             }
 
+            // [NR PATCH] ERNR 的 c0000 主包内部 binder ID (6_000_000~6_000_012) 已经
+            // 包含全部 _aXx 分片的指针条目，原 DSAS 自动扫描机制可正确发现。
+            // 但 c0000_DLC01.anibnd.dcx **不在主包索引内**（FromSoftware 把 DLC 包打成
+            // 独立文件，靠惯例命名），需要单独补一条；仅在文件实际存在时入队，避免噪音。
+            if (ParentDocument.GameRoot.GameType is SoulsGames.ERNR && chrID == "c0000")
+            {
+                foreach (var dlcName in new[] { "c0000_DLC01.anibnd.dcx", "c0000_DLC02.anibnd.dcx" })
+                {
+                    var dlcPath = "/chr/" + dlcName;
+                    if (!result.Contains(dlcPath) && ParentDocument.GameData.FileExists(dlcPath))
+                        result.Add(dlcPath);
+                }
+            }
 
             return result;
 
@@ -134,6 +147,10 @@ namespace DSAnimStudio
             { SoulsGames.DS3, "Dark Souls III" },
             { SoulsGames.BB, "Bloodborne" },
             { SoulsGames.SDT, "Sekiro: Shadows Die Twice" },
+            // [NR PATCH] 补齐 ER/ERNR/AC6 的友好显示名（原仓库未提供，UI 会显示为枚举字面量）
+            { SoulsGames.ER,   "Elden Ring" },
+            { SoulsGames.ERNR, "Elden Ring: Nightreign" },
+            { SoulsGames.AC6,  "Armored Core VI: Fires of Rubicon" },
         };
 
         public bool CheckGameTypeParamIDCompatibility(SoulsGames a, SoulsGames b)
@@ -489,8 +506,10 @@ namespace DSAnimStudio
                     ParentDocument.GameRoot.Init(bndPath, SoulsAssetPipeline.SoulsGames.ER, scratchFolder);
                     return true;
                 }
-                else if (check.Contains(@"/CL/"))
+                else if (check.Contains(@"/CL/") || ResourceGameDetection.HasCompatibleProjectPrefix(check))
                 {
+                    // [Preview] NR 项目 c0000 主包内部路径前缀实测为 "<主包前缀>"（如 "W:\<主包前缀>\data\Target\INTERROOT_win64\..."），
+                    // 而 c0010~c1000 等夜民 anibnd 用 "/CL/"。两者都属于 ERNR（Elden Ring: Nightreign）。
                     ParentDocument.GameRoot.Init(bndPath, SoulsAssetPipeline.SoulsGames.ERNR, scratchFolder);
                     return true;
                 }
@@ -570,8 +589,13 @@ namespace DSAnimStudio
                     {
                         if (directoryDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                         {
+                            // [Preview] 原代码用户取消 picker 时 return,但 GameType 已被设为新值,
+                            // 导致下次调 Init 时 "GameType != None" 判定 forceReload=false → 不再弹 picker,
+                            // 但 InterrootPath 仍为空 → 加载一堆东西失败。把 GameType 也回滚到 None。
+                            GameType = SoulsGames.None;
+                            // [RC6.1 适配] 上游 RC6.1 删除了 Main.REQUEST_REINIT_EDITOR
+                            // (Main.cs 中该字段已被注释)，改为强制关闭文档，沿用新行为。
                             ParentDocument.RequestClose_ForceDelete = true;
-                            zzz_DocumentManager.ClearAllRequests();
                             return;
                         }
                     }
@@ -1175,10 +1199,19 @@ namespace DSAnimStudio
                     Array.Resize(ref chr, chrModelCount);
                     for (int i = 0; i < chrModelCount; i++)
                     {
-                        chr[i] = new Model(ParentDocument, progress, chrbndID, chrbnd, i, anibnd, texbnd,
-                            ignoreStaticTransforms: true, additionalTexbnd: extraTexbnd,
-                            modelToImportDuringLoad: modelToImportDuringLoad,
-                            modelImportConfig: importConfig);
+                        try
+                        {
+                            chr[i] = new Model(ParentDocument, progress, chrbndID, chrbnd, i, anibnd, texbnd,
+                                ignoreStaticTransforms: true, additionalTexbnd: extraTexbnd,
+                                modelToImportDuringLoad: modelToImportDuringLoad,
+                                modelImportConfig: importConfig);
+                        }
+                        catch (Exception)
+                        {
+                            // [Preview] Model 构造抛异常时不让整个加载崩,该位置填 null,
+                            // 后续的 AddModel 会被对应的 null check 跳过。
+                            chr[i] = null;
+                        }
                     }
 
                     if (doImportActionList != null)
@@ -1848,6 +1881,9 @@ namespace DSAnimStudio
 
                 for (int i = 0; i < chr.Length; i++)
                 {
+                    // [Preview] Model 构造失败时 chr[i] 为 null,这里要跳过避免 NRE
+                    if (chr[i] == null)
+                        continue;
                     if (i > 0)
                         chr[i].Name += $"_{i}";
                     ParentDocument.Scene.AddModel(chr[i]);

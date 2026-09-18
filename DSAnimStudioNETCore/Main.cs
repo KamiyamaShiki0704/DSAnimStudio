@@ -1397,7 +1397,7 @@ namespace DSAnimStudio
 
                 var newRenderTarget0_Color = new RenderTarget2D(GFX.Device, TAE_EDITOR.ModelViewerBounds.DpiScaled().Width * ssaa,
                        TAE_EDITOR.ModelViewerBounds.DpiScaled().Height * ssaa, false, SurfaceFormat.Vector4, DepthFormat.Depth24Stencil8,
-                        msaa, RenderTargetUsage.DiscardContents);
+                        msaa, RenderTargetUsage.PreserveContents);
 
                 //var newRenderTarget0_BlurMask = new RenderTarget2D(GFX.Device, TAE_EDITOR.ModelViewerBounds.DpiScaled().Width * ssaa,
                 //       TAE_EDITOR.ModelViewerBounds.DpiScaled().Height * ssaa, false, SurfaceFormat.Vector4, DepthFormat.Depth24Stencil8,
@@ -2679,6 +2679,8 @@ namespace DSAnimStudio
                             DBG.DrawSkybox();
                             //TaeInterop.TaeViewportDrawPre(gameTime);
                             GFX.DrawScene3D();
+                            if(Config.BulletPreview_FxrEnabled) FxrOpaqueDepth.Capture(RenderTarget0_Color);
+                            else FxrOpaqueDepth.Dispose();
 
 
 

@@ -8,6 +8,17 @@ namespace DSAnimStudio.LiveRefresh
 {
     public class RequestFileReload
     {
+        private static string[] GetReloadProcessNames()
+        {
+            var root = zzz_DocumentManager.CurrentDocument.GameRoot.InterrootPath;
+            var names = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrWhiteSpace(root) && System.IO.Directory.Exists(root))
+                foreach (var file in System.IO.Directory.EnumerateFiles(root, "*_Release.exe", System.IO.SearchOption.TopDirectoryOnly))
+                    names.Add(System.IO.Path.GetFileNameWithoutExtension(file));
+            names.Add("nightreign");
+            return names.ToArray();
+        }
+
         public static bool CanReloadEntity(string entityName)
         {
             if (entityName == null)
@@ -101,6 +112,34 @@ namespace DSAnimStudio.LiveRefresh
                 "to control processes (running as administrator will force this to be true)."
                 + (zzz_DocumentManager.CurrentDocument.GameRoot.GameType is SoulsAssetPipeline.SoulsGames.ER or SoulsAssetPipeline.SoulsGames.ERNR or SoulsAssetPipeline.SoulsGames.AC6 ? "\n\nFor Elden Ring (incl. Nightreign) or Armored Core 6, make sure EasyAntiCheat is not enabled as it prevents all process memory writing." : ""), 
                 showDuration: 10);
+        }
+
+        private static bool RequestReloadChrERNR(string chrName)
+        {
+            if (Memory.ERNR_WorldChrManPtr == IntPtr.Zero || Memory.ERNR_ReloadChrFuncPtr == IntPtr.Zero)
+                Memory.UpdateAOBs_ERNR();
+
+            if (Memory.ERNR_WorldChrManPtr == IntPtr.Zero || Memory.ERNR_ReloadChrFuncPtr == IntPtr.Zero)
+                return false;
+
+            // Call Nightreign's own WorldChrMan character reload function. This lets the
+            // game allocate and construct its STL list node instead of injecting a partial
+            // node and patching the game's cleanup code as the legacy ER path does.
+            var buffer = new byte[]
+            {
+                0x48, 0xBA, 0, 0, 0, 0, 0, 0, 0, 0,                         // mov rdx, chrName
+                0x48, 0xB9, 0, 0, 0, 0, 0, 0, 0, 0,                         // mov rcx, WorldChrMan
+                0x48, 0xB8, 0, 0, 0, 0, 0, 0, 0, 0,                         // mov rax, reload function
+                0x48, 0x83, 0xEC, 0x28,                                     // sub rsp, 28h
+                0xFF, 0xD0,                                                 // call rax
+                0x48, 0x83, 0xC4, 0x28,                                     // add rsp, 28h
+                0xC3                                                        // ret
+            };
+
+            Array.Copy(BitConverter.GetBytes(Memory.ERNR_WorldChrManPtr.ToInt64()), 0, buffer, 0xC, 8);
+            Array.Copy(BitConverter.GetBytes(Memory.ERNR_ReloadChrFuncPtr.ToInt64()), 0, buffer, 0x16, 8);
+
+            return Memory.ExecuteBufferFunction(buffer, Encoding.Unicode.GetBytes(chrName + "\0"));
         }
 
         private static bool RequestReloadChr(string chrName)
@@ -206,22 +245,20 @@ namespace DSAnimStudio.LiveRefresh
             {
                 try
                 {
-                    if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType is SoulsAssetPipeline.SoulsGames.ER or SoulsAssetPipeline.SoulsGames.ERNR)
-                        Memory.AttachProc("eldenring");
+                    if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType is SoulsAssetPipeline.SoulsGames.ER)
+                        Memory.AttachProc("eldenring", "start_protected_game");
+                    else if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType is SoulsAssetPipeline.SoulsGames.ERNR)
+                        Memory.AttachProc(GetReloadProcessNames());
                     else if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType is SoulsAssetPipeline.SoulsGames.AC6)
-                        Memory.AttachProc("armoredcore6");
+                        Memory.AttachProc("armoredcore6", "start_protected_game");
                     else
                         throw new NotImplementedException();
 
-                    if (Memory.ProcessHandle == IntPtr.Zero)
-                        Memory.AttachProc("start_protected_game");
-
-                    
-
-                    
-
                     if (Memory.ProcessHandle != IntPtr.Zero)
                     {
+                        if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType is SoulsAssetPipeline.SoulsGames.ERNR)
+                            return RequestReloadChrERNR(chrName);
+
                         var fileInfo = Memory.AttachedProcess.MainModule.FileVersionInfo;
                         int gameVersion = fileInfo.FileMajorPart * 1_00_00_00
                             + fileInfo.FileMinorPart * 1_00_00

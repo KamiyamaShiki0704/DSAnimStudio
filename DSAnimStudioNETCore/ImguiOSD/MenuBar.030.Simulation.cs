@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -75,6 +75,7 @@ namespace DSAnimStudio.ImguiOSD
                     
                     Main.Config.SimEnabled_Bullets = 
                         Checkbox("Bullet Spawns", Main.Config.SimEnabled_Bullets);
+                    DoWindow(OSD.WindowBullet);
                     
                     Main.Config.SimEnabled_FFX = 
                         Checkbox("Visual Effect (FFX) Spawns", Main.Config.SimEnabled_FFX);

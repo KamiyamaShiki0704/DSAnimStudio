@@ -49,6 +49,10 @@ namespace DSAnimStudio.ImguiOSD
 
         public bool IsDockable = true;
 
+        // [Preview] One-shot docking requests let new tools join an existing tab group.
+        public uint CurrentDockId { get; private set; }
+        public uint? RequestDockId;
+
         public System.Numerics.Vector4? CustomBorderColor_Focused = null;
         public System.Numerics.Vector4? CustomBorderColor_Unfocused = null;
         public System.Numerics.Vector4? CustomBackgroundColor = null;
@@ -110,6 +114,12 @@ namespace DSAnimStudio.ImguiOSD
         protected abstract void BuildContents(ref bool anyFieldFocused);
 
         public abstract string NewImguiWindowTitle { get; }
+
+        // [Preview] When true (default, original behaviour) a floating/undocked window auto-closes
+        // as soon as it loses focus. That is hostile to tool windows opened from a menu (the menu
+        // popup keeps focus, so the window closes on frame 2 and just "flashes"). Windows that must
+        // survive while floating override this to false.
+        protected virtual bool AutoCloseWhenFloatingAndUnfocused => true;
 
         public void Update(ref Window actualFocusedWindow, ref Window currentFocusedWindow, ref bool anyWindowHovered, ref bool anyFieldFocused)
         {
@@ -176,7 +186,7 @@ namespace DSAnimStudio.ImguiOSD
                 IsOpen = true;
             
             IsFirstFrameOpen = IsOpen && !prevIsOpen;
-            
+
             if (IsOpen)
             {
                 ImGui.PushStyleColor(ImGuiCol.Border,
@@ -223,7 +233,14 @@ namespace DSAnimStudio.ImguiOSD
 
 
 
+                    if (RequestDockId.HasValue)
+                    {
+                        ImGui.SetNextWindowDockID(RequestDockId.Value, ImGuiCond.Always);
+                        ImGui.SetNextWindowCollapsed(false, ImGuiCond.Always);
+                        RequestDockId = null;
+                    }
                     ImGui.Begin(ImguiTag, ref IsOpen, flags);
+                    CurrentDockId = ImGui.GetWindowDockID();
                     try
                     {
                         if (IsRequestFocus)
@@ -232,7 +249,13 @@ namespace DSAnimStudio.ImguiOSD
                             IsRequestFocus = false;
                         }
 
-                        if (!OSD.DebugIsDockEditMode && !ImGui.IsWindowDocked() && !Focused)
+                        // [Preview] Original DSAS behaviour: an undocked (floating) window that is
+                        // not focused auto-closes. That is hostile to menu-opened tool windows, which
+                        // just flash and close. Only change vs. upstream: gate it on the per-window
+                        // AutoCloseWhenFloatingAndUnfocused flag so specific windows (e.g. "Root Motion")
+                        // can opt out. Every other window keeps the exact original behaviour.
+                        if (AutoCloseWhenFloatingAndUnfocused
+                            && !OSD.DebugIsDockEditMode && !ImGui.IsWindowDocked() && !Focused)
                             IsOpen = false;
                         
                         // if (IsFirstFrameOpen)

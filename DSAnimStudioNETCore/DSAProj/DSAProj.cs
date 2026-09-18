@@ -1,4 +1,4 @@
-﻿using DSAnimStudio.TaeEditor;
+using DSAnimStudio.TaeEditor;
 using Newtonsoft.Json;
 using SoulsAssetPipeline;
 using SoulsAssetPipeline.Animation;
@@ -1576,14 +1576,19 @@ namespace DSAnimStudio
             {
                 foreach (var cat in AnimCategories)
                 {
+                    if (cat == null) continue;  // [Preview]
                     cat.SafeAccessAnimations(animList =>
                     {
+                        if (animList == null) return;  // [Preview]
                         foreach (var anim in animList)
                         {
+                            if (anim == null) continue;  // [Preview]
                             anim.UnSafeAccessActions(actions =>
                             {
+                                if (actions == null) return;  // [Preview] Nightreign 项目 c0000 部分 anim.Actions 可能为 null
                                 for (int i = 0; i < actions.Count; i++)
                                 {
+                                    if (actions[i] == null) continue;  // [Preview]
                                     actions[i].ApplyTemplate(cat, template, anim.SplitID.GetFullID(this), i, actions[i].Type);
                                 }
                             });

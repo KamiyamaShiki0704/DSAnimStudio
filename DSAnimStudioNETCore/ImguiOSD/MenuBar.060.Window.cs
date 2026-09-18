@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -25,6 +25,8 @@ namespace DSAnimStudio.ImguiOSD
                 DoWindow(OSD.WindowEquipment);
                 DoWindow(OSD.WindowScene);
                 DoWindow(OSD.WindowSound);
+                DoWindow(OSD.WindowRootMotion);
+                DoWindow(OSD.WindowBullet);
                 DoWindow(OSD.WindowToolbox);
                 DoWindow(OSD.SpWindowNotifications);
                 DoWindow(OSD.SpWindowERRORS);

@@ -51,9 +51,14 @@ namespace Microsoft.Xna.Framework.Graphics
         internal ShaderResourceView GetShaderResourceView()
         {
             if (_resourceView == null)
-                _resourceView = new ShaderResourceView(GraphicsDevice._d3dDevice, GetTexture());
+                _resourceView = CreateShaderResourceView();
 
             return _resourceView;
+        }
+
+        internal virtual ShaderResourceView CreateShaderResourceView()
+        {
+            return new ShaderResourceView(GraphicsDevice._d3dDevice, GetTexture());
         }
 
         private void PlatformGraphicsDeviceResetting()

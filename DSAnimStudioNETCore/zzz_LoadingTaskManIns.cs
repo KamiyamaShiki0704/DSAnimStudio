@@ -34,7 +34,9 @@ namespace DSAnimStudio
             public readonly string TaskKey;
             public string DisplayString;
             public double ProgressRatio { get; private set; }
-            public bool IsComplete { get; private set; }
+            private volatile bool isComplete;
+            public bool IsComplete => isComplete;
+            private volatile bool cancellationRequested;
             //public bool IsBeingKilledManually = false;
             //public System.Diagnostics.Stopwatch Timer { get; private set; }
             //public double ElapsedSeconds => Timer.Elapsed.TotalSeconds;
@@ -62,8 +64,20 @@ namespace DSAnimStudio
 
             public void KILL_IMMEDIATELY()
             {
-                taskThread.Interrupt();
-                taskThread.Join();
+                RequestCancellation();
+                WaitForExit();
+            }
+
+            internal void RequestCancellation()
+            {
+                cancellationRequested = true;
+                try { if (!IsComplete) taskThread.Interrupt(); }
+                catch (ThreadStateException) { /* The worker already exited. */ }
+            }
+
+            internal void WaitForExit()
+            {
+                if (Thread.CurrentThread != taskThread) taskThread.Join();
             }
 
             public TaskFlags Flags = TaskFlags.None;
@@ -100,20 +114,21 @@ namespace DSAnimStudio
                         doLoad.Invoke(prog);
                         prog.Report(1.0);
                     }
+                    catch (ThreadInterruptedException) when (cancellationRequested)
+                    {
+                        // Document teardown is cancellation, not an application error.
+                    }
                     catch (Exception handled_ex) when (Main.EnableErrorHandler.LoadingTask)
                     {
-                        Main.HandleError(nameof(Main.EnableErrorHandler.LoadingTask), handled_ex);
+                        try { Main.HandleError(nameof(Main.EnableErrorHandler.LoadingTask), handled_ex); }
+                        catch (ThreadInterruptedException) when (cancellationRequested) { }
                     }
-
-
-                    // We don't check ProgressRatio to see if it's done, since
-                    // the thread is INSTANTLY KILLED when complete, which would
-                    // cause slight progress rounding errors to destroy the
-                    // entire universe. Instead, it's only considered done 
-                    // after the entire doLoad is complete.
-                    IsComplete = true;
-
-                    loadingTaskMan.CheckOnTask(TaskKey);
+                    finally
+                    {
+                        // Do not acquire the manager lock from an interrupted thread.
+                        // Update / the synchronous waiter removes completed entries.
+                        isComplete = true;
+                    }
                 });
 
                 taskThread.SetApartmentState(ApartmentState.STA);
@@ -132,6 +147,7 @@ namespace DSAnimStudio
         internal object _lock_TaskDictEdit = new object();
 
         public Dictionary<string, LoadingTask> TaskDict = new Dictionary<string, LoadingTask>();
+        private bool stopping;
 
         public void CheckOnTask(string taskKey)
         {
@@ -228,7 +244,7 @@ namespace DSAnimStudio
 
             lock (_lock_TaskDictEdit)
             {
-                if (TaskDict.ContainsKey(taskKey))
+                if (stopping || TaskDict.ContainsKey(taskKey))
                     return false;
                 // As soon as the LoadingTask is created it starts.
                 TaskDict.Add(taskKey, new LoadingTask(this, taskKey, displayString, progress =>
@@ -314,13 +330,17 @@ namespace DSAnimStudio
 
         public void KILL_ALL_TASKS()
         {
+            List<LoadingTask> tasks;
             lock (_lock_TaskDictEdit)
             {
-                foreach (var kvp in TaskDict)
-                {
-                    kvp.Value?.KILL_IMMEDIATELY();
-                }
+                stopping = true;
+                tasks = TaskDict.Values.ToList();
             }
+            // Wake every worker, including nested synchronous loaders, before joining.
+            // Their progress callbacks must remain free to acquire the manager lock.
+            foreach (var task in tasks) task.RequestCancellation();
+            foreach (var task in tasks) task.WaitForExit();
+            lock (_lock_TaskDictEdit) TaskDict.Clear();
         }
 
         public bool KillTask(string taskKey)

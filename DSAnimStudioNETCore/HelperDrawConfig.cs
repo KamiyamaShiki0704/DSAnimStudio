@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DSAnimStudio.ImguiOSD;
 using DSAnimStudio.TaeEditor;
 using ImGuiNET;
@@ -47,6 +47,12 @@ namespace DSAnimStudio
         public int RootMotionTrailSampleMax;
         public const int RootMotionTrailSampleMaxInfinityValue = 1000;
 
+        /// <summary>
+        /// [Preview] Draws the live root motion XYZ displacement of the playing animation
+        /// as 3D text above the character. Full numbers live in the "Root Motion" window.
+        /// </summary>
+        public bool EnableRootMotionDistanceText;
+
         public float AttackBehaviorHitboxOpacity;
         public float CommonBehaviorHitboxOpacity;
         public float ThrowAttackBehaviorHitboxOpacity;
@@ -80,6 +86,7 @@ namespace DSAnimStudio
             EnableRootMotionTrail = true,
             RootMotionTrailUpdateRate = 30,
             RootMotionTrailSampleMax = 200,
+            EnableRootMotionDistanceText = true,
 
             AttackBehaviorHitboxOpacity = 1,
             CommonBehaviorHitboxOpacity = 0.5f,
@@ -317,6 +324,12 @@ namespace DSAnimStudio
             ImGui.SliderInt("Root Motion Path Sample Max", ref rootMotionMaxSamples, 1, RootMotionTrailSampleMaxInfinityValue, rootMotionMaxSamples >= RootMotionTrailSampleMaxInfinityValue ? "%d (Unlimited)" : "Up to %d");
             anyFieldFocused |= ImGui.IsItemActive();
             RootMotionTrailSampleMax = Math.Max(Math.Min(rootMotionMaxSamples, RootMotionTrailSampleMaxInfinityValue), 1);
+
+            // [Preview] Live root motion XYZ displacement text above the character.
+            EnableRootMotionDistanceText =
+                MenuBar.CheckboxDual("Root Motion Distance Text",
+                    EnableRootMotionDistanceText,
+                    enabled: true, shortcut: "(This Color)", shortcutColor: Main.Colors.ColorHelperRootMotionCurrentLocation);
 
             ImGui.Separator();
 

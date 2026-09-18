@@ -20,6 +20,8 @@ namespace DSAnimStudio
 {
     public class Model : IDisposable, IHighlightableThing
     {
+        public readonly ClothPreview Cloth = new();
+        public readonly NativeRigidBodyPreview RigidPhysics = new();
         public zzz_DocumentIns Document;
 
         public readonly int ModelIdx;
@@ -198,6 +200,7 @@ namespace DSAnimStudio
         
         public NewAnimSkeleton_FLVER SkeletonFlver;
         public NewAnimationContainer AnimContainer;
+        public TaeEditor.TaeActionSimulationEnvironment ActionSimulation;
 
         public bool IsRemoModel = false;
 
@@ -301,7 +304,7 @@ namespace DSAnimStudio
             try
             {
                 TrackingTestInput = MathHelper.Clamp(TrackingTestInput, -1, 1);
-                float delta = (MathHelper.ToRadians(CurrentTrackingSpeed)) * elapsedTime * TrackingTestInput;
+                float delta = TargetTrackingPreview.TurnDelta(this, elapsedTime);
                 CharacterTrackingRotation += delta;
 
                 if (Main.IsDebugBuild && float.IsNaN(CharacterTrackingRotation))
@@ -498,6 +501,9 @@ namespace DSAnimStudio
             FLVER0 flver0 = null;
             foreach (var f in chrbnd.Files)
             {
+                if(f.Name.EndsWith("_c.hkx",StringComparison.OrdinalIgnoreCase))Cloth.SetSource(f.Bytes);
+                if(Path.GetFileName(f.Name).Equals(Name+".hkx",StringComparison.OrdinalIgnoreCase))RigidPhysics.SetSource(f.Bytes,Document.GameRoot.GameType);
+                if(f.Name.EndsWith(".clm2",StringComparison.OrdinalIgnoreCase))Cloth.SetSeamSource(f.Bytes);
                 if (TPF.Is(f.Bytes))
                 {
                     var t = TPF.Read(f.Bytes);
@@ -727,6 +733,7 @@ namespace DSAnimStudio
 
         private void LoadFLVER2(FLVER2 flver, bool useSecondUV, int baseDmyPolyID = 0, bool ignoreStaticTransforms = false)
         {
+            Cloth.SetMeshSources(flver);
             SkeletonFlver = new NewAnimSkeleton_FLVER();
             SkeletonFlver.LoadFLVERSkeleton(this, flver.Nodes);
             MainMesh = new NewMesh(this, flver, useSecondUV, null, ignoreStaticTransforms);
@@ -1305,6 +1312,43 @@ namespace DSAnimStudio
                     }
                 }
 
+                if (ModelType == ModelTypes.BaseModel)
+                {
+                    Event760TargetDraw.Draw(this);
+                    ActionSimulation?.Bullets.Draw(this);
+                }
+                if(Cloth.Enabled)
+                {
+                    var clothAnimation=AnimContainer?.CurrentAnimation;
+                    Cloth.Draw(this,clothAnimation?.CurrentTime??0,(clothAnimation?.Name??"")+":"+(clothAnimation?.LoopCount??0),GFX.CurrentWorldView);
+                }
+
+                // [Preview] Live root motion XYZ displacement text above the character.
+                // Full breakdown lives in the "Root Motion" window (Window / Animation menu).
+                if (Main.Config.RootMotionPreview_Enabled && helpers.EnableRootMotionDistanceText && ModelType == ModelTypes.BaseModel)
+                {
+                    try
+                    {
+                        var rmReadout = RootMotionReadout.Get(this);
+                        var rmText = RootMotionReadout.BuildViewportOverlayText(in rmReadout);
+                        var active760 = ActionSimulation?.Event760States.FirstOrDefault(x => x.IsActive);
+                        if (rmText != null && active760 != null)
+                            rmText += $"\n760: {active760.Numerator:0.####} / {active760.ReferenceDist:0.####} -> {active760.AppliedScale:0.####}x";
+                        if (rmText != null)
+                        {
+                            var rmTextPos = CurrentTransformPosition +
+                                new Vector3(0, ChrHitCapsuleYOffset + ChrHitCapsuleHeight + 0.55f, 0);
+                            ImGuiDebugDrawer.DrawText3D(rmText, rmTextPos,
+                                Main.Colors.ColorHelperRootMotionCurrentLocation, Color.Black,
+                                includeCardinalShadows: true);
+                        }
+                    }
+                    catch
+                    {
+                        // Purely informational overlay - never let it kill the draw pass.
+                    }
+                }
+
                 if (helpers.EnableAttackDistanceLine || helpers.EnableAttackDistanceText)
                 {
                     //Testing
@@ -1606,7 +1650,11 @@ namespace DSAnimStudio
                     //GFX.CurrentWorldView.RootMotionFollow_Translation += new Vector3(0.0001f, 0.0001f, 0.0001f);
 
                     if (translationDelta.LengthSquared() > 0)
+                    {
+                        Cloth.ShiftWorld(new Vector3(translationDelta.X, translationDelta.Y, translationDelta.Z));
+                        RigidPhysics.ShiftWorld(new Vector3(translationDelta.X, translationDelta.Y, translationDelta.Z));
                         GFX.CurrentWorldView.RegisterWorldShift(translationDelta);
+                    }
 
                     GFX.CurrentWorldView.Update(0);
                 }
@@ -1653,6 +1701,13 @@ namespace DSAnimStudio
 
                     }
 
+                    if(Cloth.Enabled||RigidPhysics.Enabled)
+                    {
+                        var clothAnimation=AnimContainer?.CurrentAnimation;
+                        RigidPhysics.Prepare(this,clothAnimation?.CurrentTime??0,(clothAnimation?.Name??"")+":"+(clothAnimation?.LoopCount??0));
+                        Cloth.Prepare(this,clothAnimation?.CurrentTime??0,(clothAnimation?.Name??"")+":"+(clothAnimation?.LoopCount??0));
+                        DummyPolyMan?.UpdateAllHitPrims();
+                    }
                     AC6NpcParts?.UpdateAttach(this);
 
 
@@ -1891,6 +1946,12 @@ namespace DSAnimStudio
                     //}
                     
 
+                    if(Cloth.Enabled||RigidPhysics.Enabled)
+                    {
+                        var clothAnimation=AnimContainer?.CurrentAnimation;
+                        RigidPhysics.Prepare(this,clothAnimation?.CurrentTime??0,(clothAnimation?.Name??"")+":"+(clothAnimation?.LoopCount??0));
+                        Cloth.Prepare(this,clothAnimation?.CurrentTime??0,(clothAnimation?.Name??"")+":"+(clothAnimation?.LoopCount??0));
+                    }
                     MainMesh.DrawMask = DrawMask;
                     MainMesh.Draw(lod, motionBlur, forceNoBackfaceCulling, isSkyboxLol, this, SkeletonFlver,
                         onDrawFail: (ex) =>
@@ -1919,6 +1980,9 @@ namespace DSAnimStudio
         {
             if (!_isDisposed)
             {
+                ActionSimulation?.Bullets.Effects.Dispose();
+                Cloth.Dispose();
+                RigidPhysics.Dispose();
                 //EquipPartsSkeletonRemapper?.Dispose();
 
                 BoneGluer?.Dispose();

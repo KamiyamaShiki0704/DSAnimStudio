@@ -689,6 +689,14 @@ namespace DSAnimStudio
 
         public void LockMouseCursor(int x, int y)
         {
+            // Absolute devices report positions on the remote desktop. Warping or clipping
+            // to the drag anchor feeds the programmatic return trip back into WM_INPUT.
+            // Let their cursor travel normally; the raw-input adapter already supplies deltas.
+            if (WindowsMouseHook.IsAbsoluteMouseMotion)
+            {
+                UnlockMouseCursor();
+                return;
+            }
             lock (_lock_CursorLock)
             {
                 framesMouseLocked = 10; 

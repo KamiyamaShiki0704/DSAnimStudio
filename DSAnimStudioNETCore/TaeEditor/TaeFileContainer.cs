@@ -1,4 +1,4 @@
-﻿using SoulsFormats;
+using SoulsFormats;
 using SoulsAssetPipeline.Animation;
 using System;
 using System.Collections.Generic;
@@ -284,8 +284,11 @@ namespace DSAnimStudio.TaeEditor
             {
                 zzz_DocumentManager.CurrentDocument.GameRoot.Init(binderPath, SoulsAssetPipeline.SoulsGames.ER, scratchFolder);
             }
-            else if (check.Contains(@"\CL\"))
+            else if (check.Contains(@"\CL\") || ResourceGameDetection.HasCompatibleProjectPrefix(check))
             {
+                // [Preview] NR 英雄 anibnd 用 "\CL\" 前缀；Nightreign 项目 c0000 主包用 "<主包前缀>" 前缀。
+                // 两者都属于 ERNR(Elden Ring: Nightreign)。没有这个分支时 Nightreign 资源全部 miss,
+                // GameType 保持 None,标题栏显示 [None],下游无法应用 TAE 模板 / 加载模型。
                 zzz_DocumentManager.CurrentDocument.GameRoot.Init(binderPath, SoulsAssetPipeline.SoulsGames.ERNR, scratchFolder);
             }
             else if (check.Contains(@"\FNR\"))

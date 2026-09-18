@@ -1,7 +1,5 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,129 +7,71 @@ namespace DSAnimStudio
 {
     public class SafeSingleThreadDispatcher : IDisposable
     {
-        private readonly object _lock_Invoke = new object();
-        private readonly object _lock_Params = new object();
+        private readonly object sync = new();
+        private readonly AutoResetEvent wake = new(false);
+        private readonly Queue<(Action Action, TaskCompletionSource Completion)> pending = new();
+        private readonly Thread thread;
+        private bool stopRequested;
 
-        private AutoResetEvent event_DoAction = new AutoResetEvent(false);
-        private AutoResetEvent event_ActionFinished = new AutoResetEvent(false);
-
-        private bool workerLoopRunning = false;
-
-        private bool stopRequested = false;
-
-
-
-
-        private Action nextAction = null;
-
-        private Thread thread;
         public SafeSingleThreadDispatcher()
         {
-            thread = new Thread(ThreadProc);
+            thread = new Thread(ThreadProc) { IsBackground = true, Name = "Audio dispatcher" };
             thread.Start();
-        }
-
-        public void RequestStop()
-        {
-            lock (_lock_Invoke)
-            {
-                bool _stopRequested = false;
-                lock (_lock_Params)
-                    _stopRequested = stopRequested;
-                if (!_stopRequested)
-                {
-
-
-                    lock (_lock_Params)
-                    {
-                        stopRequested = true;
-                        nextAction = null;
-                    }
-
-                    event_DoAction.Set();
-                    event_ActionFinished.WaitOne();
-                }
-            }
         }
 
         public void Invoke(Action action)
         {
-            lock (_lock_Invoke)
+            ArgumentNullException.ThrowIfNull(action);
+            // Nested engine calls already run on the required thread.
+            if (Thread.CurrentThread == thread) { action(); return; }
+            var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            lock (sync)
             {
-                bool _stopRequested = false;
-                lock (_lock_Params)
-                    _stopRequested = stopRequested;
-                if (!_stopRequested)
-                {
-                    lock (_lock_Params)
-                    {
-                        nextAction = action;
-                    }
-
-                    event_DoAction.Set();
-                    event_ActionFinished.WaitOne();
-                }
+                if (stopRequested) return;
+                pending.Enqueue((action, completion));
+                wake.Set();
             }
-            
+            // Each call owns its completion. If its caller is interrupted during
+            // loading cancellation, finishing this work cannot release another caller.
+            completion.Task.GetAwaiter().GetResult();
+        }
+
+        public void RequestStop()
+        {
+            lock (sync)
+            {
+                if (!stopRequested) { stopRequested = true; wake.Set(); }
+            }
+            if (Thread.CurrentThread != thread) thread.Join();
         }
 
         private void ThreadProc()
         {
-
-            workerLoopRunning = true;
-            while (workerLoopRunning)
+            try
             {
-                event_DoAction.WaitOne();
-
-                bool _stopRequested = false;
-                lock (_lock_Params)
-                    _stopRequested = stopRequested;
-
-                if (_stopRequested)
+                while (true)
                 {
-                    workerLoopRunning = false;
-                    event_ActionFinished.Set();
-                }
-                else
-                {
-                    lock (_lock_Params)
+                    wake.WaitOne();
+                    while (true)
                     {
-                        if (nextAction != null)
+                        (Action Action, TaskCompletionSource Completion) work;
+                        lock (sync)
                         {
-                            nextAction();
-                            nextAction = null;
+                            if (pending.Count == 0)
+                            {
+                                if (stopRequested) return;
+                                break;
+                            }
+                            work = pending.Dequeue();
                         }
-                        else
-                        {
-                            throw new Exception("?????");
-                        }
+                        try { work.Action(); work.Completion.SetResult(); }
+                        catch (Exception ex) { work.Completion.SetException(ex); }
                     }
-
-                    event_ActionFinished.Set();
-
                 }
-
-
-                
             }
-
-            
+            finally { wake.Dispose(); }
         }
 
-        public void Dispose()
-        {
-            bool _stopRequested = false;
-            lock (_lock_Params)
-                _stopRequested = stopRequested;
-
-            if (!_stopRequested)
-            {
-                RequestStop();
-                event_DoAction?.Dispose();
-                event_DoAction = null;
-                event_ActionFinished?.Dispose();
-                event_ActionFinished = null;
-            }
-        }
+        public void Dispose() => RequestStop();
     }
 }

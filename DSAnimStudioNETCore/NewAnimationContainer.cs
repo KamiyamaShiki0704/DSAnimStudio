@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using SoulsFormats;
 using SoulsAssetPipeline.Animation;
 using System;
@@ -638,7 +638,8 @@ namespace DSAnimStudio
 
             if (clearRootMotion)
             {
-                RootMotionTransform = NewBlendableTransform.Identity;
+                LastAppliedRootMotionDelta = NVector4.Zero;
+            RootMotionTransform = NewBlendableTransform.Identity;
                 RootMotionTransformVec = NVector4.Zero;
                 RootMotionTransformVec_Prev = NVector4.Zero;
             }
@@ -714,6 +715,7 @@ namespace DSAnimStudio
 
 
 
+        public NVector4 LastAppliedRootMotionDelta { get; private set; }
         public NewBlendableTransform RootMotionTransform { get; private set; } = NewBlendableTransform.Identity;
         public NVector4 RootMotionTransformVec { get; private set; } = NVector4.Zero;
         public NVector4 RootMotionTransformVec_Prev { get; private set; } = NVector4.Zero;
@@ -757,6 +759,9 @@ namespace DSAnimStudio
 
         public void ResetRootMotion()
         {
+            Model_ForDebug?.ActionSimulation?.CharacterCollision.Reset();
+            Model_ForDebug?.ActionSimulation?.Bullets.Reset();
+            LastAppliedRootMotionDelta = NVector4.Zero;
             RootMotionTransform = NewBlendableTransform.Identity;
             RootMotionTransformVec = NVector4.Zero;
             RootMotionTransformVec_Prev = NVector4.Zero;
@@ -950,26 +955,33 @@ namespace DSAnimStudio
             //delta *= new NVector4(Main.Config.RootMotionTranslationMultiplierXZ, Main.Config.RootMotionTranslationMultiplierY,
             //        Main.Config.RootMotionTranslationMultiplierXZ, Main.Config.RootMotionRotationMultiplier);
 
-            float signX = delta.X > 0 ? 1 : -1;
-            float signY = delta.Y > 0 ? 1 : -1;
-            float signZ = delta.Z > 0 ? 1 : -1;
-            float signW = delta.W > 0 ? 1 : -1;
+            if (Main.Config.RootMotionPreview_Enabled)
+            {
+                float signX = delta.X > 0 ? 1 : -1;
+                float signY = delta.Y > 0 ? 1 : -1;
+                float signZ = delta.Z > 0 ? 1 : -1;
+                float signW = delta.W > 0 ? 1 : -1;
 
-            if (delta.X != 0)
-                delta.X = (float)Math.Pow(Math.Abs(delta.X), Main.Config.RootMotionTranslationPowerXZ) * signX;
+                if (delta.X != 0)
+                    delta.X = (float)Math.Pow(Math.Abs(delta.X), Main.Config.RootMotionTranslationPowerXZ) * signX;
 
-            if (delta.Y != 0)
-                delta.Y = (float)Math.Pow(Math.Abs(delta.Y), Main.Config.RootMotionTranslationPowerY) * signY;
+                if (delta.Y != 0)
+                    delta.Y = (float)Math.Pow(Math.Abs(delta.Y), Main.Config.RootMotionTranslationPowerY) * signY;
 
-            if (delta.Z != 0)
-                delta.Z = (float)Math.Pow(Math.Abs(delta.Z), Main.Config.RootMotionTranslationPowerXZ) * signZ;
+                if (delta.Z != 0)
+                    delta.Z = (float)Math.Pow(Math.Abs(delta.Z), Main.Config.RootMotionTranslationPowerXZ) * signZ;
 
-            if (delta.W != 0)
-                delta.W = (float)Math.Pow(Math.Abs(delta.W), Main.Config.RootMotionRotationPower) * signW;
+                if (delta.W != 0)
+                    delta.W = (float)Math.Pow(Math.Abs(delta.W), Main.Config.RootMotionRotationPower) * signW;
 
-            delta *= new NVector4(Main.Config.RootMotionTranslationMultiplierXZ * TaeEditor.TaeActionSimulationEnvironment.TaeRootMotionScaleXZ, Main.Config.RootMotionTranslationMultiplierY,
-                    Main.Config.RootMotionTranslationMultiplierXZ * TaeEditor.TaeActionSimulationEnvironment.TaeRootMotionScaleXZ, Main.Config.RootMotionRotationMultiplier);
+                delta *= new NVector4(Main.Config.RootMotionTranslationMultiplierXZ * (Model_ForDebug?.ActionSimulation?.TaeRootMotionScaleXZ ?? 1f), Main.Config.RootMotionTranslationMultiplierY,
+                        Main.Config.RootMotionTranslationMultiplierXZ * (Model_ForDebug?.ActionSimulation?.TaeRootMotionScaleXZ ?? 1f), Main.Config.RootMotionRotationMultiplier);
+            }
 
+            if (Model_ForDebug?.ActionSimulation is { } simulation)
+                delta = simulation.CharacterCollision.Resolve(Model_ForDebug, RootMotionTransform, delta);
+
+            LastAppliedRootMotionDelta = delta;
             RootMotionTransform *= NewBlendableTransform.FromRootMotionSample(delta);
 
             RootMotionTransformVec_Prev = RootMotionTransformVec;

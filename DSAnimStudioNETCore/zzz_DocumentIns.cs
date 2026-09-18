@@ -162,7 +162,9 @@ namespace DSAnimStudio
 
             if (!IsDisposed)
             {
-
+                // Asset workers retain this document and its scene/texture managers.
+                // Join them before releasing any of those resources.
+                LoadingTaskMan?.KILL_ALL_TASKS();
                 if (SoundManager != null)
                 {
                     SoundManager.PurgeLoadedAssets();
@@ -259,7 +261,6 @@ namespace DSAnimStudio
 
                 if (LoadingTaskMan != null)
                 {
-                    LoadingTaskMan?.KILL_ALL_TASKS();
                     LoadingTaskMan.ParentDocument = null;
                     LoadingTaskMan = null;
                 }

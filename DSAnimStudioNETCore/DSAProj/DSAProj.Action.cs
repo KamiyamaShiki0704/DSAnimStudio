@@ -589,6 +589,9 @@ namespace DSAnimStudio
             internal void ApplyTemplate(AnimCategory containingCategory, Template template,
                 long animID, int eventIndex, int eventType)
             {
+                // [Preview] template 为 null 时跳过(出现在 ERNR 模板加载链路出错时);
+                // 没模板就保持 ParameterBytes 原样,UI 会以 hex 显示而非 friendly 字段。
+                if (template == null) return;
 
                 if (template.ContainsKey(eventType))
                 {

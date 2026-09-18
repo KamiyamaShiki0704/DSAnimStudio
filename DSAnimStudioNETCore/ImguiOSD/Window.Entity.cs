@@ -127,6 +127,34 @@ namespace DSAnimStudio.ImguiOSD
 
                 if (curModel != null)
                 {
+                    if(ImGui.CollapsingHeader("Native cloth physics",ImGuiTreeNodeFlags.DefaultOpen))
+                    {
+                        bool clothEnabled=curModel.Cloth.Enabled;
+                        if(ImGui.Checkbox("Preview cloth physics on model",ref clothEnabled))curModel.Cloth.Enabled=clothEnabled;
+                        ImGui.TextWrapped(curModel.Cloth.Status);
+                        if(clothEnabled)
+                        {
+                            if(ImGui.Button("Reset cloth preview"))curModel.Cloth.Reset();
+                            ImGui.Text($"Native output meshes: {curModel.Cloth.DeformedMeshCount}");
+                            ImGui.Text($"Physics-driven bones (including descendants): {curModel.Cloth.DeformedBoneCount}");
+                            ImGui.TextWrapped("The installed Havok Content Tools runtime executes the original Cloth operators and constraints. Replay from the start. Physics stops while the animation is paused; disabling preview releases its runtime.");
+                            if(ImGui.CollapsingHeader("Cloth limitations"))ImGui.TextWrapped(curModel.Cloth.Limitations);
+                        }
+                    }
+                    if(ImGui.CollapsingHeader("Native rigid-body physics"))
+                    {
+                        bool rigidEnabled=curModel.RigidPhysics.Enabled;
+                        if(ImGui.Checkbox("Preview native rigid bodies",ref rigidEnabled))curModel.RigidPhysics.Enabled=rigidEnabled;
+                        ImGui.TextWrapped(curModel.RigidPhysics.Status);
+                        if(rigidEnabled)
+                        {
+                            bool dynamics=curModel.RigidPhysics.Simulate;
+                            if(ImGui.Checkbox("Release bodies to ragdoll dynamics",ref dynamics))curModel.RigidPhysics.Simulate=dynamics;
+                            if(ImGui.Button("Reset rigid-body preview"))curModel.RigidPhysics.Reset();
+                            ImGui.TextWrapped("Uses the original hknp bodies, constraints and skeleton mappers through Havok Content Tools. Play the animation to advance physics. Bodies follow animation until released; release simulates a ragdoll and can drive the Cloth preview. No ground or game map is loaded.");
+                            ImGui.TextWrapped("ER, Nightreign, Sekiro and DS3 character hknp assets with two skeleton mappers. This does not reconstruct game-specific partial-ragdoll controllers, wind or AC6 physics.");
+                        }
+                    }
                     if (manuallySelectNpcParamID_IsInit && curModel.NpcParam != null)
                     {
                         manuallySelectNpcParamID = curModel.NpcParam.ID;

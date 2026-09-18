@@ -2,6 +2,7 @@
 using Linearstar.Windows.RawInput;
 using System.Windows.Forms;
 using ImGuiNET;
+using Linearstar.Windows.RawInput.Native;
 
 namespace DSAnimStudio
 {
@@ -70,27 +71,36 @@ namespace DSAnimStudio
 
 		public static RawMouseMovedDelegate RawMouseMoved;
 
+		private static readonly RawMouseMotion motion = new();
+		private static bool wasActive;
+		public static bool IsAbsoluteMouseMotion => motion.IsAbsolute;
+		public static void ResetAbsoluteMouseMotion() => motion.ResetAbsolutePositions();
+
 		static void RawInputReceived(object sender, RawInputEventArgs e)
 		{
 			try
 			{
-				// Catch your input here!
 				var data = e.Data;
-
-				// You can identify the source device using Header.DeviceHandle or just Device.
-				var sourceDeviceHandle = data.Header.DeviceHandle;
-				var sourceDevice = data.Device;
-
-				// The data will be an instance of either RawInputMouseData, RawInputKeyboardData, or RawInputHidData.
-				// They contain the raw input data in their properties.
+				if (wasActive != Main.Active)
+				{
+					motion.ResetAbsolutePositions();
+					wasActive = Main.Active;
+				}
 				switch (data)
 				{
 					case RawInputMouseData mouse:
-						//if (mouse.Mouse.Flags != Linearstar.Windows.RawInput.Native.RawMouseFlags.None)
-						//{
-						//	RawMouseMoved?.Invoke(mouse.Mouse.LastX, mouse.Mouse.LastY);
-						//}
-						RawMouseMoved?.Invoke(mouse.Mouse.LastX, mouse.Mouse.LastY);
+						var desktop = System.Drawing.Rectangle.Empty;
+						if ((mouse.Mouse.Flags & RawMouseFlags.MoveAbsolute) != 0)
+							desktop = (mouse.Mouse.Flags & RawMouseFlags.VirtualDesktop) != 0
+								? SystemInformation.VirtualScreen
+								: new System.Drawing.Rectangle(System.Drawing.Point.Empty, SystemInformation.PrimaryMonitorSize);
+						var delta = motion.Translate(RawInputDeviceHandle.GetRawValue(data.Header.DeviceHandle),
+							mouse.Mouse.Flags, mouse.Mouse.LastX, mouse.Mouse.LastY, desktop);
+						// A physical mouse may already have captured the cursor before RDP takes over.
+						if (motion.IsAbsolute && Main.Input?.MouseCursorLocked == true)
+							Main.Input.UnlockMouseCursor();
+						if (delta.X != 0 || delta.Y != 0)
+							RawMouseMoved?.Invoke(delta.X, delta.Y);
 						break;
 				}
 			}
@@ -110,6 +120,7 @@ namespace DSAnimStudio
 
 		public static void Hook(IntPtr hWnd)
         {
+			motion.ResetAbsolutePositions();
 			// To begin catching inputs, first make a window that listens WM_INPUT.
 			receiver = new RawInputReceiverWindow();
 
@@ -120,6 +131,7 @@ namespace DSAnimStudio
 
 		public static void Unhook()
 		{
+			motion.ResetAbsolutePositions();
 			receiver?.ReleaseHandle();
 			RawInputDevice.UnregisterDevice(HidUsageAndPage.Mouse);
 		}

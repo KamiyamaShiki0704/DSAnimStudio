@@ -1,4 +1,4 @@
-﻿using DSAnimStudio.GFXShaders;
+using DSAnimStudio.GFXShaders;
 using DSAnimStudio.ImguiOSD;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -2255,7 +2255,10 @@ namespace DSAnimStudio.TaeEditor
                     container = new DSAProj.TaeContainerInfo.ContainerAnibnd(fileContainerName, chrbndName);
                     
                     bool containsNoTae = !TaeFileContainer.AnibndContainsTae(fileContainerName);
-                
+
+                    // This picker document is discarded below. NewLoadFile detects
+                    // and initializes the game on the destination document before
+                    // applying TAE templates; do not start asset workers here.
                     if (containsNoTae)
                     {
                         if (ParentDocument.GameRoot.GameType == SoulsAssetPipeline.SoulsGames.None)
@@ -3525,7 +3528,7 @@ namespace DSAnimStudio.TaeEditor
             double nearestFrameTime = nearestFrame * PlaybackCursor.CurrentSnapInterval;
             double deltaToSnapToNearestFrame = nearestFrameTime - PlaybackCursor.CurrentTime;
             PlaybackCursor.NewApplyRelativeScrub(deltaToSnapToNearestFrame);
-            PlaybackCursor.NewApplyRelativeScrub(PlaybackCursor.CurrentSnapInterval);
+            PlaybackCursor.NewApplyRelativeScrub(PlaybackCursor.CurrentSnapInterval, frameStep: true);
 
             Graph.LayoutManager.ScrollToPlaybackCursor(-1, modTime: true, clampTime: true);
         }
@@ -3538,7 +3541,7 @@ namespace DSAnimStudio.TaeEditor
             double nearestFrameTime = nearestFrame * PlaybackCursor.CurrentSnapInterval;
             double deltaToSnapToNearestFrame = nearestFrameTime - PlaybackCursor.CurrentTime;
             PlaybackCursor.NewApplyRelativeScrub(deltaToSnapToNearestFrame);
-            PlaybackCursor.NewApplyRelativeScrub(-PlaybackCursor.CurrentSnapInterval);
+            PlaybackCursor.NewApplyRelativeScrub(-PlaybackCursor.CurrentSnapInterval, frameStep: true);
 
             Graph.LayoutManager.ScrollToPlaybackCursor(-1, modTime: false, clampTime: true);
         }
@@ -3619,8 +3622,14 @@ namespace DSAnimStudio.TaeEditor
 
                 Main.MainThreadLazyDispatch(() =>
                 {
-                    Graph.ViewportInteractor.NewScrub(forceRefreshTimeact: true);
-                    Graph.ViewportInteractor.CurrentModel.NewForceSyncUpdate();
+                    // [Preview] Nightreign 项目下 chrbnd 可能加载失败导致 CurrentModel 为 null，
+                    // 这个 lambda 被延迟执行，不在外层 try/catch 里，NRE 会冒到顶层崩溃。
+                    try
+                    {
+                        Graph?.ViewportInteractor?.NewScrub(forceRefreshTimeact: true);
+                        Graph?.ViewportInteractor?.CurrentModel?.NewForceSyncUpdate();
+                    }
+                    catch { /* swallow — 没模型时 scrub/sync 不是关键路径 */ }
                 });
 
                 success = true;

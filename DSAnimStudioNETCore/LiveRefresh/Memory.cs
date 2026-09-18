@@ -41,6 +41,9 @@ namespace DSAnimStudio.LiveRefresh
         public static IntPtr ER_CrashFixPtr = IntPtr.Zero;
         public static IntPtr ER_WorldChrManPtr = IntPtr.Zero;
 
+        public static IntPtr ERNR_WorldChrManPtr = IntPtr.Zero;
+        public static IntPtr ERNR_ReloadChrFuncPtr = IntPtr.Zero;
+
         public static IntPtr AC6_CrashFixPtr = IntPtr.Zero;
         public static IntPtr AC6_WorldChrManPtr = IntPtr.Zero;
 
@@ -49,8 +52,8 @@ namespace DSAnimStudio.LiveRefresh
             var aobLocation = aobScanner.Scan(AOBScanner.StringToAOB(aob));
             if (aobLocation == IntPtr.Zero)
                 return IntPtr.Zero;
-            uint relAddr = Kernel32.ReadUInt32(ProcessHandle, aobLocation + addrOffset);
-            return (IntPtr)((ulong)(aobLocation + endOfRelJumpInstr) + relAddr);
+            int relAddr = unchecked((int)Kernel32.ReadUInt32(ProcessHandle, aobLocation + addrOffset));
+            return (IntPtr)(aobLocation.ToInt64() + endOfRelJumpInstr + relAddr);
         }
 
         private static Dictionary<string, string> _ini = new Dictionary<string, string>();
@@ -155,22 +158,28 @@ namespace DSAnimStudio.LiveRefresh
 
         public static void UpdateAOBs_ERNR()
         {
-            //ERNR TODO
             CheckIngameReloadINI();
 
             var aob = new AOBScanner(AttachedProcess);
-            ER_WorldChrManPtr = Memory.ScanRelativeAob(aob, GetIngameReloadIniOption("ER_WorldChrManPtr_AOB") ?? "48 8B 05 ?? ?? ?? ?? 48 85 C0 74 0F 48 39 88 ?? ?? ?? ?? 75 06 89 B1 64 03 ?? ?? 0F 28 05 ?? ?? ?? ?? 4C 8D 45 E7",
-                GetIngameReloadIniOptionInt("ER_WorldChrManPtr_JumpInstr_StartOffsetInAOB") ?? 3, GetIngameReloadIniOptionInt("ER_WorldChrManPtr_JumpInstr_EndOffsetInAOB") ?? 7);
-            if (ER_WorldChrManPtr == IntPtr.Zero)
-                zzz_NotificationManagerIns.PushNotificationWarn("Live reload WARNING - Could not find Elden Ring WorldChrMan AOB");
-            ER_WorldChrManPtr = Kernel32.ReadIntPtr(ProcessHandle, ER_WorldChrManPtr, true);
+            var worldChrManGlobal = ScanRelativeAob(aob,
+                GetIngameReloadIniOption("ERNR_WorldChrManPtr_AOB") ?? "48 8B 05 ?? ?? ?? ?? 48 83 7F 08 00 74 ?? C6 80 C4 75 01 00 01 C7 80 C8 75 01 00 00 00 20 41 4C 8D 05 ?? ?? ?? ?? 33 D2 48 8B CB",
+                GetIngameReloadIniOptionInt("ERNR_WorldChrManPtr_JumpInstr_StartOffsetInAOB") ?? 3,
+                GetIngameReloadIniOptionInt("ERNR_WorldChrManPtr_JumpInstr_EndOffsetInAOB") ?? 7);
 
-            var crashPatchOffsetAob = AOBScanner.StringToAOB(GetIngameReloadIniOption("ER_CrashPatchOffset_AOB") ?? "80 65 ?? FD 48 C7 45 ?? 07 00 00 00 ?? 8D 45 48 4C 89 60 ?? 48 83 78 ?? 08 72 03 48 8B 00 66 44 89 20 49 8B 8F ?? ?? ?? ?? 48 8B 01 48 ?? ??");
-            IntPtr crashPatchOffset = aob.Scan(crashPatchOffsetAob);
-            if (crashPatchOffset == IntPtr.Zero)
-                zzz_NotificationManagerIns.PushNotificationWarn("Live reload WARNING - Could not find Elden Ring crash patch AOB");
-            crashPatchOffset = crashPatchOffset + crashPatchOffsetAob.Length - (GetIngameReloadIniOptionInt("ER_CrashPatchOffset_DistFromEndOfAOB") ?? 3);
-            ER_CrashFixPtr = crashPatchOffset;
+            ERNR_WorldChrManPtr = worldChrManGlobal == IntPtr.Zero
+                ? IntPtr.Zero
+                : Kernel32.ReadIntPtr(ProcessHandle, worldChrManGlobal, true);
+
+            ERNR_ReloadChrFuncPtr = aob.Scan(AOBScanner.StringToAOB(
+                GetIngameReloadIniOption("ERNR_ReloadChrFunc_AOB") ?? "48 85 D2 0F 84 ?? ?? ?? ?? 48 89 5C 24 18 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 D9 48 81 EC B0 00 00 00 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 45 17 48 8B FA 4C 8B E9 48 8B 91 B0 75 01 00"));
+
+            if (worldChrManGlobal == IntPtr.Zero)
+                zzz_NotificationManagerIns.PushNotificationWarn("Live reload WARNING - Could not find Nightreign WorldChrMan AOB");
+            else if (ERNR_WorldChrManPtr == IntPtr.Zero)
+                zzz_NotificationManagerIns.PushNotificationWarn("Live reload WARNING - Nightreign WorldChrMan is not initialized yet");
+
+            if (ERNR_ReloadChrFuncPtr == IntPtr.Zero)
+                zzz_NotificationManagerIns.PushNotificationWarn("Live reload WARNING - Could not find Nightreign character reload function AOB");
         }
 
         public static void UpdateAOBs_AC6()
@@ -197,50 +206,72 @@ namespace DSAnimStudio.LiveRefresh
             AC6_CrashFixPtr = crashPatchOffset;
         }
 
-        public static void AttachProc(string procName)
+        public static bool AttachProc(params string[] procNames)
         {
-            if (AttachedProcess != null && AttachedProcess?.HasExited != true)
-                return;
+            if (procNames == null || procNames.Length == 0)
+                return false;
+
+            if (AttachedProcess != null && AttachedProcess?.HasExited != true &&
+                procNames.Any(name => string.Equals(name, AttachedProcess.ProcessName, StringComparison.OrdinalIgnoreCase)) &&
+                ProcessHandle != IntPtr.Zero && Kernel32.GetHandleInformation(ProcessHandle, out _))
+                return true;
+
+            if (AttachedProcess != null)
+                CloseHandle();
 
             if (!Kernel32.GetHandleInformation(ProcessHandle, out _))
             {
                 CloseHandle(handleInvalid: true);
             }
-            //CloseHandle();
-            var processes = System.Diagnostics.Process.GetProcessesByName(procName);
-            if (processes.Length > 0)
-            {
-                var Process = processes[0];
-                BaseAddress = Process.MainModule.BaseAddress;
-                try
-                {
-                    ProcessHandle = Kernel32.OpenProcess(0x2 | 0x8 | 0x10 | 0x20 | 0x400, false, Process.Id);
-                    AttachedProcess = Process;
-                    AttachedProcess.Exited += AttachedProcess_Exited;
 
-                    if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType == SoulsAssetPipeline.SoulsGames.ER)
-                    {
-                        UpdateAOBs_ER();
-                    }
-                    else if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType == SoulsAssetPipeline.SoulsGames.ERNR)
-                    {
-                        UpdateAOBs_ERNR();
-                    }
-                    else
-                    {
-                        ER_CrashFixPtr = IntPtr.Zero;
-                        ER_WorldChrManPtr = IntPtr.Zero;
-                    }
-                }
-                catch
-                {
-                    CloseHandle();
-                }
-            }
-            else
+            foreach (string procName in procNames.Where(name => !string.IsNullOrWhiteSpace(name)))
             {
-                Console.WriteLine("Cant find process. Is it running?", "Process");
+                var processes = System.Diagnostics.Process.GetProcessesByName(procName);
+                if (processes.Length > 0)
+                {
+                    var process = processes[0];
+                    try
+                    {
+                        BaseAddress = process.MainModule.BaseAddress;
+                        ProcessHandle = Kernel32.OpenProcess(0x2 | 0x8 | 0x10 | 0x20 | 0x400, false, process.Id);
+                        if (ProcessHandle == IntPtr.Zero)
+                        {
+                            process.Dispose();
+                            continue;
+                        }
+
+                        AttachedProcess = process;
+                        AttachedProcess.EnableRaisingEvents = true;
+                        AttachedProcess.Exited += AttachedProcess_Exited;
+
+                        if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType == SoulsAssetPipeline.SoulsGames.ER)
+                        {
+                            UpdateAOBs_ER();
+                        }
+                        else if (zzz_DocumentManager.CurrentDocument.GameRoot.GameType == SoulsAssetPipeline.SoulsGames.ERNR)
+                        {
+                            UpdateAOBs_ERNR();
+                        }
+                        else
+                        {
+                            ER_CrashFixPtr = IntPtr.Zero;
+                            ER_WorldChrManPtr = IntPtr.Zero;
+                            ERNR_WorldChrManPtr = IntPtr.Zero;
+                            ERNR_ReloadChrFuncPtr = IntPtr.Zero;
+                        }
+
+                        return true;
+                    }
+                    catch
+                    {
+                        process.Dispose();
+                        CloseHandle();
+                    }
+                }
             }
+
+            Console.WriteLine("Cant find process. Is it running?", "Process");
+            return false;
         }
 
         private static void AttachedProcess_Exited(object sender, EventArgs e)
@@ -273,6 +304,8 @@ namespace DSAnimStudio.LiveRefresh
             }
             ER_CrashFixPtr = IntPtr.Zero;
             ER_WorldChrManPtr = IntPtr.Zero;
+            ERNR_WorldChrManPtr = IntPtr.Zero;
+            ERNR_ReloadChrFuncPtr = IntPtr.Zero;
         }
 
         // read address
@@ -447,53 +480,58 @@ namespace DSAnimStudio.LiveRefresh
             }
         }
 
-        public static void ExecuteBufferFunction(byte[] array, byte[] argument, int argLocationInAsmArray = 0x2)
+        public static bool ExecuteBufferFunction(byte[] array, byte[] argument, int argLocationInAsmArray = 0x2)
         {
             var Size1 = 0x100;
             var Size2 = 0x100;
 
+            if (array == null || argument == null || array.Length > Size1 || argument.Length > Size2 ||
+                argLocationInAsmArray < 0 || argLocationInAsmArray + sizeof(long) > array.Length)
+                return false;
+
             var address = Kernel32.VirtualAllocEx(ProcessHandle, IntPtr.Zero, Size1, 0x1000 | 0x2000, 0x40);
             var bufferAddress = Kernel32.VirtualAllocEx(ProcessHandle, IntPtr.Zero, Size2, 0x1000 | 0x2000, 0x40);
+            bool remoteThreadStarted = false;
+            bool remoteThreadCompleted = false;
 
             try
             {
-                //var bytjmp = 0x2;
-                var bytjmpAr = new byte[8];
+                if (address == IntPtr.Zero || bufferAddress == IntPtr.Zero || !WriteBytes(bufferAddress, argument))
+                    return false;
 
-                WriteBytes(bufferAddress, argument);
+                var argumentAddressBytes = BitConverter.GetBytes(bufferAddress.ToInt64());
+                Array.Copy(argumentAddressBytes, 0, array, argLocationInAsmArray, argumentAddressBytes.Length);
 
-                bytjmpAr = BitConverter.GetBytes((long)bufferAddress);
-                Array.Copy(bytjmpAr, 0, array, argLocationInAsmArray, bytjmpAr.Length);
+                if (!WriteBytes(address, array))
+                    return false;
 
-                if (address != IntPtr.Zero && bufferAddress != IntPtr.Zero)
+                var threadHandle = Kernel32.CreateRemoteThread(ProcessHandle, IntPtr.Zero, 0, address, IntPtr.Zero, 0, out var threadId);
+                if (threadHandle == IntPtr.Zero)
+                    return false;
+
+                remoteThreadStarted = true;
+                try
                 {
-                    if (WriteBytes(address, array))
-                    {
-
-                        var threadHandle = Kernel32.CreateRemoteThread(ProcessHandle, IntPtr.Zero, 0, address, IntPtr.Zero, 0, out var threadId);
-                        if (threadHandle != IntPtr.Zero)
-                        {
-                            Kernel32.WaitForSingleObject(threadHandle, 30000);
-                        }
-
-                    }
-                    Kernel32.VirtualFreeEx(ProcessHandle, address, Size1, 2);
-                    Kernel32.VirtualFreeEx(ProcessHandle, bufferAddress, Size2, 2);
+                    remoteThreadCompleted = Kernel32.WaitForSingleObject(threadHandle, 30000) == 0;
+                    return remoteThreadCompleted;
+                }
+                finally
+                {
+                    Kernel32.CloseHandle(threadHandle);
                 }
             }
             finally
             {
-                if (address != IntPtr.Zero)
+                // Do not free executable/data memory while a timed-out remote thread may
+                // still be using it. A rare timeout leaks 512 bytes instead of crashing the game.
+                if (!remoteThreadStarted || remoteThreadCompleted)
                 {
-                    Kernel32.VirtualFreeEx(ProcessHandle, address, Size1, 2);
-                }
-                if (bufferAddress != IntPtr.Zero)
-                {
-                    Kernel32.VirtualFreeEx(ProcessHandle, bufferAddress, Size2, 2);
+                    if (address != IntPtr.Zero)
+                        Kernel32.VirtualFreeEx(ProcessHandle, address, 0, Kernel32.MEM_RELEASE);
+                    if (bufferAddress != IntPtr.Zero)
+                        Kernel32.VirtualFreeEx(ProcessHandle, bufferAddress, 0, Kernel32.MEM_RELEASE);
                 }
             }
-
-            
         }
     }
 }

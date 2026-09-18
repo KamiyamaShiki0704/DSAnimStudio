@@ -19,6 +19,8 @@
   </event>
   
   <event id="2" name="InvokeBulletBehavior">
+    <field name="AttachmentType" type="u8" offset="0xC"/>
+    <field name="FireContinuously" type="u8" offset="0xD" only_in="ER,ERNR"/>
     <field name="DummyPolyID" type="s32" offset="0x0"/>
     <field name="Index" type="s32" offset="0x4"/>
     <field name="BehaviorJudgeID" type="s32" offset="0x8"/>
@@ -27,10 +29,17 @@
   </event>
 
   <event id="4" name="InvokeBulletBehavior_Type4" only_in="SDT">
+    <field name="AttachmentType" type="u8" offset="0xC"/>
     <field name="DummyPolyID" type="s32" offset="0x0"/>
     <field name="Index" type="s32" offset="0x4"/>
     <field name="BehaviorJudgeID" type="s32" offset="0x8"/>
     <field name="StateInfo" type="s16" offset="0xE"/>
+  </event>
+
+  <event id="64" name="CastHighlightedMagic">
+    <field name="DummyPolyID" type="s32" offset="0x0"/>
+    <field name="MagicRefSlot" type="u8" offset="0x8" only_in="BB,DS3,SDT,ER,ERNR,AC6"/>
+    <field name="FireContinuously" type="u8" offset="0x4" only_in="ER,ERNR"/>
   </event>
 
   <event id="5" name="InvokeCommonBehavior">

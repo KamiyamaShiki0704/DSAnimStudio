@@ -569,6 +569,7 @@ namespace DSAnimStudio
                     {
                         if (zzz_DocumentManager.CurrentDocument.EditorScreen.ModelViewerBounds.Contains(Main.Input.LeftClickDownAnchor))
                         {
+                            WindowsMouseHook.ResetAbsoluteMouseMotion();
                             dragType = ViewportDragType.LeftClick;
                         }
                         else
@@ -580,6 +581,7 @@ namespace DSAnimStudio
                     {
                         if (zzz_DocumentManager.CurrentDocument.EditorScreen.ModelViewerBounds.Contains(Main.Input.RightClickDownAnchor))
                         {
+                            WindowsMouseHook.ResetAbsoluteMouseMotion();
                             dragType = ViewportDragType.RightClick;
                         }
                         else

@@ -1,4 +1,4 @@
-﻿using DSAnimStudio.DbgMenus;
+using DSAnimStudio.DbgMenus;
 using Microsoft.Xna.Framework;
 using SoulsFormats;
 using SoulsAssetPipeline.Animation;
@@ -437,6 +437,11 @@ namespace DSAnimStudio.TaeEditor
 
         public void MarkRootMotionStart()
         {
+            // [Preview] Nightreign 项目下 chrbnd 可能找不到导致 Model 没初始化。
+            // 早期 return 避免 AccessMainModel / WorldViewManager 等下游空引用。
+            if (ParentDocument?.Scene?.MainModel == null)
+                return;
+
             CreateRootMotionPoints();
 
 
@@ -793,9 +798,21 @@ namespace DSAnimStudio.TaeEditor
                     {
                         if (!Graph.MainScreen.SuppressNextModelOverridePrompt && ParentDocument.GameRoot.GameType is not SoulsAssetPipeline.SoulsGames.DES)
                         {
-                            
-                            var newChrbndName = ParentDocument.GameData.ShowPickInsideBndPath("/chr/", @".*\/c\d\d\d\d.chrbnd.dcx$", $@"/chr/{shortFileName.Substring(0, 4)}",
-                                $"Choose Character Model for '{shortFileName}.anibnd.dcx'", $@"/chr/{shortFileName}.chrbnd.dcx");
+                            // [Preview] 先直接试同名 chrbnd.dcx —— 大多数情况下 anibnd 与 chrbnd 同名同目录,
+                            // 没必要弹 picker 让用户每次手选(更没必要在 SearchFiles 返回空时直接报错杀 Document)。
+                            var defaultChrbndPath = $@"/chr/{shortFileName.Substring(0, Math.Min(5, shortFileName.Length))}.chrbnd.dcx";
+                            string newChrbndName = null;
+                            if (ParentDocument.GameData.FileExists(defaultChrbndPath))
+                            {
+                                newChrbndName = defaultChrbndPath;
+                            }
+                            else
+                            {
+                                // 同名不存在才走交互式 picker 兜底
+                                newChrbndName = ParentDocument.GameData.ShowPickInsideBndPath("/chr/", @".*\/c\d\d\d\d.chrbnd.dcx$", $@"/chr/{shortFileName.Substring(0, 4)}",
+                                    $"Choose Character Model for '{shortFileName}.anibnd.dcx'", $@"/chr/{shortFileName}.chrbnd.dcx");
+                            }
+
                             if (newChrbndName != null)
                             {
                                 modelFileName = fileName_Model = newChrbndName;
@@ -804,13 +821,18 @@ namespace DSAnimStudio.TaeEditor
                             }
                             else
                             {
-                                System.Windows.Forms.MessageBox.Show("Unable to find any characters in game data. " +
-                                    "Make sure your directories are setup properly on the 'Setup Project Directories' menu.", "Error", System.Windows.Forms.MessageBoxButtons.OK,
-                                    System.Windows.Forms.MessageBoxIcon.Error);
-
-                                //Main.REQUEST_REINIT_EDITOR = true;
-                                ParentDocument.RequestClose_ForceDelete = true;
-                                return;
+                                // [Preview] 找不到 chrbnd 时只警告不杀 Document —— TAE 编辑器对模型加载不强制依赖,
+                                // 让用户仍可编辑动画/事件,只是 viewport 没有 3D 模型预览。
+                                // [RC6.1 适配] 上游此处改为 ParentDocument.RequestClose_ForceDelete = true,
+                                // 与本补丁"保留文档继续编辑"的意图相反,故不采用。
+                                System.Windows.Forms.MessageBox.Show(
+                                    $"No character model (chrbnd.dcx) found for '{shortFileName}'.\n\n" +
+                                    "TAE editing will still work, but the 3D viewport won't show a character model.\n\n" +
+                                    "If you want a model preview, place 'cXXXX.chrbnd.dcx' next to the anibnd or set up your project directories.",
+                                    "Model Not Found (non-fatal)",
+                                    System.Windows.Forms.MessageBoxButtons.OK,
+                                    System.Windows.Forms.MessageBoxIcon.Warning);
+                                IS_STILL_LOADING = false;
                             }
 
                         }
@@ -1269,6 +1291,9 @@ namespace DSAnimStudio.TaeEditor
                     baseSlotOnly: absolute && !NewAnimationContainer.GLOBAL_SYNC_FORCE_REFRESH, 
                     forceSyncUpdate: NewAnimationContainer.GLOBAL_SYNC_FORCE_REFRESH, ignoreRootMotion);
 
+                // [Preview] Timeline dragging also uses relative scrubs in DSA.
+                ActionSim.Bullets.AdvanceFromCursor(CurrentModel, timeDelta, absolute, pb);
+                ActionSim.AnimationEffects.SampleAfterPose();
                 UpdateAndDrawRootMotionPoints(CurrentModel.AnimContainer.RootMotionTransform, false, timeDelta);
 
                 if (!ignoreRootMotion)
@@ -1429,6 +1454,8 @@ namespace DSAnimStudio.TaeEditor
 
         public void RemoveTransition()
         {
+            // [Preview] 当 chrbnd 缺失导致 CurrentModel 为 null 时安全 no-op
+            if (CurrentModel?.AnimContainer == null) return;
             CurrentModel.AnimContainer.NewSetBlendDurationOfSlot(NewAnimSlot.SlotTypes.Base, SplitAnimID.Invalid, -1, false);
             CurrentModel.AnimContainer.RemoveTransition();
         }

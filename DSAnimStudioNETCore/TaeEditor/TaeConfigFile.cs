@@ -1,4 +1,4 @@
-﻿using DSAnimStudio.DebugPrimitives;
+using DSAnimStudio.DebugPrimitives;
 using DSAnimStudio.ImguiOSD;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
@@ -14,6 +14,8 @@ namespace DSAnimStudio.TaeEditor
         public bool WelcomeMessageDisabled = false;
 
         public OSD.DefaultLayoutTypes DesiredUILayoutType = OSD.DefaultLayoutTypes.V5;
+        // [Preview] Migrate preview tools once; later user layout edits remain persistent.
+        public bool PreviewToolsDockedWithScene = false;
 
         public bool ResetFloorOnAnimStart = true;
         public bool ResetHeadingOnAnimStart = false;
@@ -271,6 +273,24 @@ namespace DSAnimStudio.TaeEditor
         public bool SimEnabled_SetOpacity = true;
         public bool SimEnabled_ModelMasks = true;
         public bool SimEnabled_Bullets = true;
+        // [Preview] Parameter-driven Bullet trajectory preview.
+        public int BulletPreview_FallbackDummy = -1;
+        public int BulletPreview_MagicID = -1, BulletPreview_MagicSource = 0;
+        public bool BulletPreview_Derived = true, BulletPreview_UnitPresent = true;
+        public bool BulletPreview_UnitCollision = true, BulletPreview_GroundCollision = true;
+        public bool BulletPreview_ForceStopUnit = false, BulletPreview_Condition5Ground = true;
+        public float BulletPreview_GroundY = 0;
+        public bool BulletPreview_Enabled = true, BulletPreview_Locked = true;
+        public bool BulletPreview_FxrEnabled = false;
+        public bool FxrPreview_AnimationEvents = true;
+        public int FxrPreview_FloorMaterial = 1;
+        public bool FxrPreview_BulletEffects = true;
+        public bool FxrPreview_ParticleCollision = false;
+        public bool BulletPreview_Use760Target = true, BulletPreview_RespectLockCone = true;
+        public int BulletPreview_UnlockedSource = 0, BulletPreview_Seed = 1;
+        public float BulletPreview_TargetX = 0, BulletPreview_TargetY = 0, BulletPreview_TargetZ = -5;
+        public float BulletPreview_Type2SpawnLift = 0;
+        public float BulletPreview_AimHeight = 1, BulletPreview_MaxLifetime = 8, BulletPreview_TrailRetention = 3;
         public bool SimEnabled_FFX = true;
 
 
@@ -281,6 +301,36 @@ namespace DSAnimStudio.TaeEditor
         public bool SimEnabled_NF_RootMotionScale = false;
         public bool SimEnabled_NF_MoveRelative = false;
         public bool SimOption_NF_MoveRelative_UseCameraAsTarget = false;
+
+        // ---- [Preview] Event 760 位移追踪缩放模拟 ----
+        // Nightreign 1.3.0.0 原生水平模式：到达角=0时 clamp(D-R, Min, Max)/ReferenceDist。
+        // 非零到达角参与到达点几何；请求位移经过碰撞后才得到实际位移。
+        public bool RootMotionPreview_Enabled = true;
+        public bool SimEnabled_Event760RootMotionBoost = true;
+        // true = 手填恒定距离；false = 固定世界目标或实时相机位置，由 UseFixedTarget 选择。
+        public bool Event760_UseManualTargetDist = false;
+        public float Event760_ManualTargetDist = 3.0f;
+        public float Event760_ManualTargetAngle = 0;
+        // Fixed world target allows distance and scale to change as the actor moves.
+        public bool Event760_UseFixedTarget = true;
+        public float Event760_TargetX = 0, Event760_TargetY = 0, Event760_TargetZ = 3;
+        public bool Event760_ShowTarget = true;
+        public bool Event760_AutoTurnToTarget = true;
+        public bool Event760_EnableTargetCollision = true;
+        // Zero uses the loaded actor's NpcParam / character hit capsule radius.
+        public float Event760_ActorCollisionRadius = 0;
+        public float Event760_TargetCollisionRadius = 0.4f;
+        public float Event760_TargetCollisionHeight = 1.5f;
+        // 倍率来源：false = 按上面的模型算；true = 用下面手填倍率（兜底 / 对比用）
+        public bool Event760_UseManualMultiplier = false;
+        public float Event760_ManualMultiplier = 1.0f;
+        // 倍率上限，防止 ReferenceDist 异常小时位移爆掉。<=0 = 不限制。
+        // 默认放宽到 50：作者推荐的强追踪填法 (4, 2, 50, 0.5) 需要 12.5 倍，5 倍会把它掐掉。
+        public float Event760_MaxMultiplier = 50.0f;
+        // 事件窗口的水平净位移（米），仅用于恒定倍率估算，不是动态落点预测。
+        // 0 = 自动采样 HKX 在事件起止时间的水平净位移。
+        // 实际动态结果以从头播放后的 Scaled world XYZ 为准。
+        public float Event760_AnimOwnDist = 0.0f;
 
         public string LastCubemapUsed = "DefaultCubemap";
         public float SkyboxBrightness = 0.25f;
@@ -672,14 +722,23 @@ namespace DSAnimStudio.TaeEditor
                 {
                     IsFemale = false,
 
+                    // [NR PATCH] 原默认 ID（HD=980000 / BD=981100 / WP=2180000 / 31190000 等）在
+                    // 实测的 NR 项目目录（DVDROOT_win64/parts/）里**不存在**，会导致预览角色光膀子。
+                    // 改为 NR 项目里 100% 存在的"测试英雄"通用套（_M_1570 系列，男性骨架共用） + WP_A_0000。
                     EquipIDs = new Dictionary<NewChrAsm.EquipSlotTypes, int>()
                     {
-                        { NewChrAsm.EquipSlotTypes.Head, 5000000 },
-                        { NewChrAsm.EquipSlotTypes.Body, 5000100 },
-                        { NewChrAsm.EquipSlotTypes.Arms, 5000200 },
-                        { NewChrAsm.EquipSlotTypes.Legs, 5000300 },
-                        { NewChrAsm.EquipSlotTypes.RightWeapon, 3750000 },
-                        { NewChrAsm.EquipSlotTypes.LeftWeapon, 30750000 },
+                        // [NR PATCH] 保留 1570 系列（实测依据）：
+                        // 本项目的 DVDROOT_win64/parts 下 HD_ 只有 0300/0310/1570 三个型号，
+                        // HD_M_1570 / BD_M_1570 / AM_M_1570 / LG_M_1570 四件全部存在。
+                        // 上游 baseline(RC4.2) 的 980000 系列、以及上游 RC6.1 改用的
+                        // 5000000/5000100/5000200/5000300 系列，在本项目目录均无对应 parts
+                        // （后者是给正式版 NR 的 ID 段），采用会导致预览角色光膀子。
+                        { NewChrAsm.EquipSlotTypes.Head, 1570 },        // HD_M_1570
+                        { NewChrAsm.EquipSlotTypes.Body, 1570 },        // BD_M_1570
+                        { NewChrAsm.EquipSlotTypes.Arms, 1570 },        // AM_M_1570
+                        { NewChrAsm.EquipSlotTypes.Legs, 1570 },        // LG_M_1570
+                        { NewChrAsm.EquipSlotTypes.RightWeapon, 0 },    // WP_A_0000
+                        { NewChrAsm.EquipSlotTypes.LeftWeapon, 0 },     // WP_A_0000
                     },
 
                     DirectEquipInfos = new Dictionary<NewChrAsm.EquipSlotTypes, NewEquipSlot_Armor.DirectEquipInfo>()
@@ -689,7 +748,7 @@ namespace DSAnimStudio.TaeEditor
                             {
                                 PartPrefix = NewEquipSlot_Armor.DirectEquipPartPrefix.FC,
                                 Gender = NewEquipSlot_Armor.DirectEquipGender.BothGendersUseMF,
-                                ModelID = 0
+                                ModelID = 3   // [NR PATCH] FC_F_0003 是实测唯一可用的 Face 资产
                             }
                         },
                         {

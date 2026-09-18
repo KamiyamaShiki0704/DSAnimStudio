@@ -34,6 +34,14 @@ namespace DSAnimStudio
         private bool HasNoLODs = true;
 
         VertexBuffer VertBuffer;
+        ClothMeshBuffer clothVertices;
+        public void SetClothFrame(int[] indices, Vector3[] positions, Vector3[] normals, Vector3[] tangents, Matrix[] frameDeltas = null)
+        {
+            if (VertBuffer == null) return;
+            clothVertices ??= new ClothMeshBuffer(VertBuffer);
+            clothVertices.SetFrame(indices, positions, normals, tangents, frameDeltas);
+        }
+        public void ClearClothFrame() { clothVertices?.Dispose(); clothVertices = null; }
         //VertexBufferBinding VertBufferBinding;
 
         public int DebugViewWeightOfBoneIndex = -1;
@@ -789,7 +797,7 @@ namespace DSAnimStudio
             Bounds = BoundingBox.CreateFromPoints(MeshVertices.Select(x => x.Position));
 
             VertBuffer = new VertexBuffer(GFX.Device,
-                typeof(FlverShaderVertInput), MeshVertices.Length, BufferUsage.WriteOnly);
+                typeof(FlverShaderVertInput), MeshVertices.Length, containingModel.Cloth?.HasSource == true ? BufferUsage.None : BufferUsage.WriteOnly);
             VertBuffer.SetData(MeshVertices);
 
             //VertBufferBinding = new VertexBufferBinding(VertBuffer, 0, 0);
@@ -1378,7 +1386,7 @@ namespace DSAnimStudio
                     {
                         pass.Apply();
 
-                        GFX.Device.SetVertexBuffer(VertBuffer);
+                        GFX.Device.SetVertexBuffer(clothVertices?.Buffer ?? VertBuffer);
 
                         foreach (var faceSet in MeshFacesets)
                         {
@@ -1421,7 +1429,7 @@ namespace DSAnimStudio
                         {
                             pass.Apply();
 
-                            GFX.Device.SetVertexBuffer(VertBuffer);
+                            GFX.Device.SetVertexBuffer(clothVertices?.Buffer ?? VertBuffer);
 
                             foreach (var faceSet in MeshFacesets)
                             {
@@ -1467,6 +1475,7 @@ namespace DSAnimStudio
 
         public void Dispose()
         {
+            ClearClothFrame();
             if (MeshFacesets != null)
             {
                 for (int i = 0; i < MeshFacesets.Count; i++)

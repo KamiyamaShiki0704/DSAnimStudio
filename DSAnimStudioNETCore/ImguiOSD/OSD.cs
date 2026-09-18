@@ -38,6 +38,20 @@ namespace DSAnimStudio.ImguiOSD
             File.WriteAllText(iniFileName, iniText);
 
             ImGui.LoadIniSettingsFromDisk(iniFileName);
+            Main.Config.PreviewToolsDockedWithScene = false;
+        }
+
+        // [Preview] Use the live Scene group instead of assuming a fixed dock ID.
+        // Parameters is a fallback when Scene has been closed in a saved layout.
+        private static void DockPreviewToolsWithScene()
+        {
+            if (Main.Config.PreviewToolsDockedWithScene) return;
+            uint dock = WindowScene.IsOpen ? WindowScene.CurrentDockId : 0;
+            if (dock == 0 && SpWindowParameters.IsOpen) dock = SpWindowParameters.CurrentDockId;
+            if (dock == 0) return;
+            WindowRootMotion.RequestDockId = WindowBullet.RequestDockId = dock;
+            WindowRootMotion.IsOpen = WindowBullet.IsOpen = true;
+            Main.Config.PreviewToolsDockedWithScene = true;
         }
 
         public static TaeEditorScreen Tae => Main.TAE_EDITOR;
@@ -176,6 +190,10 @@ namespace DSAnimStudio.ImguiOSD
         public static Window.Toolbox WindowToolbox = new Window.Toolbox();
         public static Window.Entity WindowEntity = new Window.Entity();
         public static Window.Sound WindowSound = new Window.Sound();
+
+        // [Preview] Live root motion XYZ displacement readout.
+        public static Window.RootMotionInfo WindowRootMotion = new Window.RootMotionInfo();
+        public static Window.BulletTrajectory WindowBullet = new Window.BulletTrajectory();
 
 
         public static Window.Parameters SpWindowParameters = new Window.Parameters();
@@ -451,7 +469,15 @@ namespace DSAnimStudio.ImguiOSD
                     
                     WindowSound.Update(ref actualFocusedWindow, ref currentFocusedWindow, ref anyWindowHovered,
                             ref anyFieldFocused);
+
+                    DockPreviewToolsWithScene();
+
+                    // [Preview] Live root motion XYZ displacement readout.
+                    WindowRootMotion.Update(ref actualFocusedWindow, ref currentFocusedWindow, ref anyWindowHovered,
+                            ref anyFieldFocused);
                     
+                    WindowBullet.Update(ref actualFocusedWindow, ref currentFocusedWindow, ref anyWindowHovered, ref anyFieldFocused);
+
                     SpWindowParameters.Update(ref actualFocusedWindow, ref currentFocusedWindow, ref anyWindowHovered,
                         ref anyFieldFocused);
                     

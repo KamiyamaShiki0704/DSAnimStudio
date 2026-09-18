@@ -10,13 +10,14 @@ namespace MonoGame.Effect
         {
             writer.Write(Name);
 
-            writer.Write((ushort)Size);
+            // The local runtime uses 32-bit sizes and parameter offsets.
+            writer.Write(Size);
 
             writer.Write(ParameterIndex.Count);
             for (var i=0; i < ParameterIndex.Count; i++)
             {
                 writer.Write(ParameterIndex[i]);
-                writer.Write((ushort)ParameterOffset[i]);
+                writer.Write(ParameterOffset[i]);
             }
         }
     }

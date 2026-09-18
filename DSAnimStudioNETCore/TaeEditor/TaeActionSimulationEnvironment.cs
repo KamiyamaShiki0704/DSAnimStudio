@@ -113,6 +113,12 @@ namespace DSAnimStudio.TaeEditor
         public void NewSimulationScrub(NewGraph Graph, Func<SplitAnimID, DSAProj.Animation> getAnimFunc, SplitAnimID taeAnimID, 
             bool justStartedPlayback, bool ignoreBlendProcess = false)
         {
+            CharacterCollision.BeginSimulationFrame();
+            Bullets.BeginFrame();
+            AnimationEffects.BeginFrame();
+            TaeRootMotionScaleXZ = 1;
+            Event760States.Clear();
+            Event760TargetPosition = null;
             bool anyValidSlots = false;
             bool validBaseAnimSlot = false;
             var enableOverlayTae = Main.Config.SimulateTaeOfOverlayedAnims;
@@ -239,14 +245,16 @@ namespace DSAnimStudio.TaeEditor
             ModPlaybackSpeed_AC6Event9700 = 1.0f;
 
 
-            TaeRootMotionScaleXZ = 1;
-
             SimulatedActiveSpEffects.Clear();
 
             PrepareModelForTaeFrame(MODEL);
 
             TestChrTargetPos = (cfg.SimOption_NF_MoveRelative_UseCameraAsTarget) ? 
                 Vector3.Transform(Vector3.Zero, Document.WorldViewManager.CurrentView.CameraLocationInWorld.WorldMatrix) : null;
+
+            Event760TargetPosition = !cfg.RootMotionPreview_Enabled || cfg.Event760_UseManualTargetDist ? null
+                : cfg.Event760_UseFixedTarget ? new Vector3(cfg.Event760_TargetX, cfg.Event760_TargetY, cfg.Event760_TargetZ)
+                : Vector3.Transform(Vector3.Zero, Document.WorldViewManager.CurrentView.CameraLocationInWorld.WorldMatrix);
 
             List<int> attackIndicesUsed = new List<int>();
 
@@ -456,6 +464,21 @@ namespace DSAnimStudio.TaeEditor
                                     act.IsActive_BasedOnStateInfo = true;
                             }
 
+                            if (Event760State.SupportsGame(Document.GameRoot.GameType)
+                                && (soloHoverAction == null || act == soloHoverAction))
+                                CharacterCollision.RegisterAction(act, slotAnim, br);
+
+                            if (BulletGameSupport.IsEmission(Document.GameRoot.GameType, act.Type) && BulletPreview.Enabled(MODEL)
+                                && (soloHoverAction == null || act == soloHoverAction))
+                                CollectBulletPreview(act, slotAnim);
+
+                            if(soloHoverAction==null || act==soloHoverAction)
+                                AnimationEffects.Register(act,slotAnim,GetModelOfBox(act));
+
+                            // Inspect all 760 windows, including paused, muted and out-of-window events.
+                            if (TrySimulateEvent760(act, slotAnim, br))
+                                continue;
+
                             if (!act.IsActive)
                             {
                                 //if (act.IsActive_BasedOnMuteSolo)
@@ -510,6 +533,19 @@ namespace DSAnimStudio.TaeEditor
                                             dmyPolySrcToUse = ParamData.AtkParam.DummyPolySource.RightWeapon0;
                                         else if (sourceType == 2)
                                             dmyPolySrcToUse = ParamData.AtkParam.DummyPolySource.LeftWeapon0;
+                                        // [Preview] Source==0(Default) 表示"用该动画对应的武器"。
+                                        // 玩家攻击若此时 dmyPolySrc 仍是 BaseModel(常见于 HitView 设置被存成 BaseModel),
+                                        // 会导致武器攻击被当身体攻击、按裸 judgeID 查 behavior 而查不到 → 无判定框。
+                                        // 因此对玩家默认落到已装备的武器(优先右手,无右手则左手)。
+                                        else if (sourceType == 0
+                                                 && (MODEL?.IS_PLAYER ?? false)
+                                                 && dmyPolySrcToUse == ParamData.AtkParam.DummyPolySource.BaseModel)
+                                        {
+                                            if (MODEL?.ChrAsm?.GetWpnSlot(NewChrAsm.EquipSlotTypes.RightWeapon)?.EquipParam != null)
+                                                dmyPolySrcToUse = ParamData.AtkParam.DummyPolySource.RightWeapon0;
+                                            else if (MODEL?.ChrAsm?.GetWpnSlot(NewChrAsm.EquipSlotTypes.LeftWeapon)?.EquipParam != null)
+                                                dmyPolySrcToUse = ParamData.AtkParam.DummyPolySource.LeftWeapon0;
+                                        }
                                     }
                                 }
                                 else if (act.Type == 5)
@@ -577,8 +613,8 @@ namespace DSAnimStudio.TaeEditor
                                         index = mdl.DummyPolyMan.GetDynamicAttackSlotForEvent(act);
                                     mdl.DummyPolyMan.SetAttackVisibility(index, spawnType, isNpcAtk, atkParam, true, -1 /*dummyPolyOverride*/, dmyPolySrcToUse, elapsedTime: slotTime - act.StartTime);
                                     attackIndicesUsed.Add(index);
-
                                 }
+
                             }
 
 
@@ -1081,7 +1117,7 @@ namespace DSAnimStudio.TaeEditor
                                     }
                                 }
 
-                                else if (cfg.SimEnabled_NF_RootMotionScale && act.Type == 7027)
+                                else if (cfg.RootMotionPreview_Enabled && cfg.SimEnabled_NF_RootMotionScale && act.Type == 7027)
                                 {
                                     float fadeDuration = act.EndTime - act.StartTime;
                                     float timeSinceFadeStart = slotTime - act.StartTime;
@@ -1090,6 +1126,7 @@ namespace DSAnimStudio.TaeEditor
 
                                     TaeRootMotionScaleXZ *= MathHelper.Lerp(grad.X, grad.Y, MathHelper.Clamp(timeSinceFadeStart / fadeDuration, 0, 1));
                                 }
+
 
                             }
                         }
@@ -1209,6 +1246,7 @@ namespace DSAnimStudio.TaeEditor
 
                 MODEL.TrackingTestInput = Model.GlobalTrackingInput + trackDir;
             }
+            else MODEL.TrackingTestInput = 0;
             
             
             
@@ -1235,6 +1273,12 @@ namespace DSAnimStudio.TaeEditor
 
         public void NewSimulationInit(List<DSAProj.Action> actions)
         {
+            CharacterCollision.Reset();
+            Bullets.Reset();
+            AnimationEffects.Reset();
+            TaeRootMotionScaleXZ = 1;
+            Event760States.Clear();
+            Event760TargetPosition = null;
             
 
             foreach (var act in actions)
@@ -1289,6 +1333,9 @@ namespace DSAnimStudio.TaeEditor
 
 
                 var mdl = GetModelOfBox(ev);
+
+                if(ev.Type==112 && !FloorFxrResolver.TryResolve(mdl?.Document?.ParamManager,
+                    Main.Config.FxrPreview_FloorMaterial,ffxid,out ffxid,out _))return;
 
                 if (ev.HasInternalSimField("DummyPolySource"))
                 {
@@ -1658,7 +1705,172 @@ namespace DSAnimStudio.TaeEditor
             
         }
         
-        public static float TaeRootMotionScaleXZ = 1;
+        // Per-model state: documents and equipment must not share a root motion multiplier.
+        public float TaeRootMotionScaleXZ = 1;
+        public readonly List<Event760State> Event760States = new();
+        public readonly CharacterCollisionPreview CharacterCollision = new();
+        public readonly BulletPreview Bullets = new();
+        public readonly TaeFxrPreview AnimationEffects = new();
+
+        private void CollectBulletPreview(DSAProj.Action act, NewHavokAnimation animation)
+        {
+            if (!act.IsActive) return;
+            try
+            {
+                var mdl = GetModelOfBox(act);
+                if (mdl == null || animation == null) return;
+                var game = Document.GameRoot.GameType;
+                var source = HitViewDummyPolySource;
+                if (act.HasInternalSimField("Source"))
+                {
+                    int value = Convert.ToInt32(act.ReadInternalSimField("Source"));
+                    if (value == 1) source = ParamData.AtkParam.DummyPolySource.RightWeapon0;
+                    else if (value == 2) source = ParamData.AtkParam.DummyPolySource.LeftWeapon0;
+                }
+                if (game == SoulsGames.BB && act.Type == EVID_InvokeGunBehavior && mdl.IS_PLAYER
+                    && source == ParamData.AtkParam.DummyPolySource.BaseModel)
+                    source = ParamData.AtkParam.DummyPolySource.LeftWeapon0;
+                string resolution = null;
+                ParamData.BehaviorParam behavior;
+                if (act.Type == 64)
+                {
+                    if (!mdl.IS_PLAYER) { Bullets.Report("Event 64 requires a player model and an explicitly selected Magic ID."); return; }
+                    source = Main.Config.BulletPreview_MagicSource switch
+                    {
+                        1 => ParamData.AtkParam.DummyPolySource.RightWeapon0,
+                        2 => ParamData.AtkParam.DummyPolySource.LeftWeapon0,
+                        _ => ParamData.AtkParam.DummyPolySource.BaseModel,
+                    };
+                    int slot = act.HasInternalSimField("MagicRefSlot") ? Convert.ToInt32(act.ReadInternalSimField("MagicRefSlot")) : 0;
+                    if (!MagicBulletResolver.TryResolve(Document.ParamManager, Main.Config.BulletPreview_MagicID, slot, out int magicBullet, out resolution))
+                    { Bullets.Report(resolution); return; }
+                    behavior = new ParamData.BehaviorParam { RefType = ParamData.BehaviorParam.RefTypes.Bullet, RefID = magicBullet };
+                }
+                else behavior = GetBehaviorParamFromEvBox(act, source);
+                if (behavior == null && !mdl.IS_PLAYER && (mdl.NpcParam == null || mdl.NpcParam.ID == 0)
+                    && game is SoulsGames.ER or SoulsGames.ERNR
+                    && mdl.Name?.Length >= 5 && int.TryParse(mdl.Name.Substring(1, 4), out int character))
+                {
+                    // Missing NPC metadata must not hide existing preview-only character Behavior rows.
+                    int judge = Convert.ToInt32(act.ReadInternalSimField("BehaviorJudgeID"));
+                    long candidate = 200000000L + character * 10000L + judge;
+                    if (judge >= 0 && judge < 1000 && Document.ParamManager.BehaviorParam.TryGetValue(candidate, out var inferred)
+                        && inferred.RefType == ParamData.BehaviorParam.RefTypes.Bullet)
+                    {
+                        behavior = inferred;
+                        resolution = $"No character NpcParam; preview infers variation {character * 10} from {mdl.Name}, using existing Behavior {candidate}.";
+                    }
+                }
+                if (behavior?.RefType != ParamData.BehaviorParam.RefTypes.Bullet)
+                {
+                    // Mixed behavior events can legitimately invoke attacks / effects instead.
+                    if (act.Type is 2 or 4 or 8 or 318) Bullets.Report($"Event {act.Type} has no resolved Bullet behavior reference.");
+                    return;
+                }
+                int id = behavior.RefID;
+                int dummy = act.HasInternalSimField("DummyPolyID") ? Convert.ToInt32(act.ReadInternalSimField("DummyPolyID")) : Main.Config.BulletPreview_FallbackDummy;
+                int lastDummy = dummy;
+                if (game == SoulsGames.AC6 && behavior.AC6DummyPolyStart >= 0)
+                {
+                    dummy = behavior.AC6DummyPolyStart;
+                    lastDummy = behavior.AC6DummyPolyEnd < dummy ? dummy : Math.Min(behavior.AC6DummyPolyEnd, dummy + 63);
+                }
+                else if (!act.HasInternalSimField("DummyPolyID"))
+                {
+                    if (game == SoulsGames.AC6)
+                    {
+                        var definition = BulletPreview.LoadDefinition(Document.ParamManager, id);
+                        if (definition?.MuzzleDummy >= 0) dummy = definition.MuzzleDummy;
+                    }
+                    lastDummy = dummy;
+                    if (dummy < 0) Bullets.Report($"Event {act.Type}: no muzzle position; using character origin proxy. Set Fallback muzzle dummy for precise placement.");
+                }
+                int first = dummy, last = lastDummy;
+                List<Matrix> Muzzles()
+                {
+                    var result = new List<Matrix>();
+                    for (int d = first; d <= last; d++)
+                    {
+                        if (d < 0) { result.Add(mdl.CurrentTransform.WorldMatrix); continue; }
+                        var manager = mdl.ChrAsm?.GetDummyPolySpawnPlace(source, d, mdl.DummyPolyMan) ?? mdl.DummyPolyMan;
+                        int local = manager == mdl.DummyPolyMan ? d : d % 10000;
+                        if (manager != null && manager.NewCheckDummyPolyExists(local)) result.AddRange(manager.GetDummyMatricesByID(local, getAbsoluteWorldPos: true));
+                    }
+                    return result;
+                }
+                Bullets.Register(act, animation, id, () => Muzzles().Select(m => m.Translation).ToList(), resolution,
+                    () => Muzzles().Select(m => BulletMath.Unit(Vector3.TransformNormal(Vector3.Forward, m), Vector3.Forward)).ToList(),
+                    act.HasInternalSimField("AttachmentType") ? Convert.ToInt32(act.ReadInternalSimField("AttachmentType")) : 0,
+                    act.HasInternalSimField("FireContinuously") && Convert.ToInt32(act.ReadInternalSimField("FireContinuously")) == 1);
+            }
+            catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or IndexOutOfRangeException or NullReferenceException or System.IO.IOException)
+            { Bullets.Report($"Event {act.Type} preview: {ex.Message}"); }
+        }
+        public Vector3? Event760TargetPosition { get; private set; }
+
+        private bool TrySimulateEvent760(DSAProj.Action act, NewHavokAnimation anim, BinaryReaderEx br)
+        {
+            if (act.Type != 760 || !Event760State.SupportsGame(Document?.GameRoot?.GameType)) return false;
+            var cfg = Main.Config;
+            var st = new Event760State
+            {
+                Action = act, AnimationName = anim.Name,
+                StartTime = act.StartTime, EndTime = act.EndTime, Time = anim.CurrentTime,
+                Allowed = act.IsActive, SimulationEnabled = cfg.RootMotionPreview_Enabled && cfg.SimEnabled_Event760RootMotionBoost,
+                ManualMultiplier = cfg.Event760_UseManualMultiplier,
+                ManualScale = cfg.Event760_ManualMultiplier, MaxScale = cfg.Event760_MaxMultiplier,
+            };
+            Event760States.Add(st);
+            // Shared 760 payload: enable/padding, five floats, then unused padding.
+            if (act.ParameterBytes == null || act.ParameterBytes.Length < 24)
+            {
+                st.Allowed = false;
+                st.Evaluate();
+                return true;
+            }
+            st.IsEnable = br.GetByte(0) != 0;
+            st.ReferenceDist = br.GetSingle(4);
+            st.EnableRangeMin = br.GetSingle(8);
+            st.EnableRangeMax = br.GetSingle(12);
+            st.ArriveAngleFromTarget = br.GetSingle(16);
+            st.ArriveDistFromTarget = br.GetSingle(20);
+            if (cfg.Event760_UseManualTargetDist)
+            {
+                st.HasTarget = true;
+                st.DistSource = "manual (constant)";
+                st.DistToTarget = cfg.Event760_ManualTargetDist;
+                st.AngleToTargetDeg = cfg.Event760_ManualTargetAngle;
+            }
+            else if (Event760TargetPosition is Vector3 target)
+            {
+                var root = MODEL.AnimContainer?.RootMotionTransform ?? NewBlendableTransform.Identity;
+                var position = Vector3.Transform(Vector3.Zero, MODEL.OriginOffsetMatrix * root.GetXnaMatrixFull());
+                var d = target - position;
+                st.HasTarget = true;
+                st.DistSource = cfg.Event760_UseFixedTarget ? "fixed world target" : "camera";
+                st.DistToTarget = new Vector2(d.X, d.Z).Length();
+            }
+            if (cfg.Event760_AnimOwnDist > 0 && float.IsFinite(cfg.Event760_AnimOwnDist))
+            {
+                st.WindowRawDistance = cfg.Event760_AnimOwnDist;
+                st.HasWindowMeasurement = true;
+                st.MeasurementSource = "manual override";
+            }
+            else
+            {
+                var data = anim.RootMotion?.Data;
+                if (data?.Frames?.Length > 0 && float.IsFinite(st.StartTime) && float.IsFinite(st.EndTime) && st.EndTime > st.StartTime)
+                {
+                    var delta = data.GetSampleClamped(Math.Clamp(st.EndTime, 0, data.Duration))
+                        - data.GetSampleClamped(Math.Clamp(st.StartTime, 0, data.Duration));
+                    st.WindowRawDistance = new Vector2(delta.X, delta.Z).Length();
+                    st.HasWindowMeasurement = float.IsFinite(st.WindowRawDistance);
+                }
+            }
+            st.Evaluate();
+            TaeRootMotionScaleXZ *= st.AppliedScale;
+            return true;
+        }
 
         private ParamData.AtkParam.DummyPolySource HitViewDummyPolySource => 
             MODEL.IS_PLAYER ? (OverrideHitViewDummyPolySource ?? Main.Config?.HitViewDummyPolySource ?? ParamData.AtkParam.DummyPolySource.BaseModel) 
@@ -1703,6 +1915,7 @@ namespace DSAnimStudio.TaeEditor
         {
             Document = doc;
             MODEL = mdl;
+            if (mdl != null) mdl.ActionSimulation = this;
         }
 
         public void ClearBoxStuff()

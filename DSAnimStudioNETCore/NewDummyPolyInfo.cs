@@ -84,7 +84,7 @@ namespace DSAnimStudio
                     Vector3.Normalize(new Vector3(dummy.Forward.X, dummy.Forward.Y, dummy.Forward.Z)),
                     dummy.UseUpwardVector ? Vector3.Normalize(new Vector3(dummy.Upward.X, dummy.Upward.Y, dummy.Upward.Z)) : Vector3.Up)
                     * Matrix.CreateTranslation(new Vector3(dummy.Position.X, dummy.Position.Y, dummy.Position.Z))
-                    * ((boneIndex >= 0 && (forceFollowFlag ?? dummy.Flag1)) ? flverSkeleton.Bones[boneIndex].FKMatrix : Matrix.Identity);
+                    * ((boneIndex >= 0 && (forceFollowFlag ?? dummy.Flag1)) ? flverSkeleton.GetPreviewBoneFK(boneIndex) : Matrix.Identity);
                 //dummy.Flag1 = DummyFollowFlag, whether it follows, afaik
             }
         }

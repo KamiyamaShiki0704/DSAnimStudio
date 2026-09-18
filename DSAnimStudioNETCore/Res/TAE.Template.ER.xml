@@ -157,7 +157,7 @@
     <s32 name="AttackIndex" />
     <s32 name="BehaviorJudgeID" />
     <u8 name="AttachmentType" />
-    <b name="Enable" />
+    <b name="FireContinuously" />
     <s16 name="StateInfo" />
     <s16 name="Offset" />
     <u8 />

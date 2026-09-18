@@ -20,7 +20,7 @@ namespace DSAnimStudio.TaeEditor
             Graph = graph;
         }
 
-        public void NewApplyRelativeScrub(double t)
+        public void NewApplyRelativeScrub(double t, bool frameStep = false)
         {
             CurrentTime += t;
             if (CurrentTime < 0)
@@ -29,6 +29,7 @@ namespace DSAnimStudio.TaeEditor
                 CurrentTime = MaxTime;
             StartTime = CurrentTime;
             Scrubbing = true;
+            IsFrameStepScrub = frameStep;
             IsPlaying = false;
         }
         
@@ -56,6 +57,7 @@ namespace DSAnimStudio.TaeEditor
             this.OldIsPlaying = pb.OldIsPlaying;
             this.prevScrubbing = pb.prevScrubbing;
             this.Scrubbing = pb.Scrubbing;
+            this.IsFrameStepScrub = pb.IsFrameStepScrub;
             this.SnapInterval = pb.SnapInterval;
             this.StartTime = pb.StartTime;
             this._currentTimeVal = pb._currentTimeVal;
@@ -333,6 +335,7 @@ namespace DSAnimStudio.TaeEditor
 
 
 
+        public bool IsFrameStepScrub { get; private set; }
         private bool _scrubbing = false;
 
         public bool Scrubbing
@@ -341,6 +344,7 @@ namespace DSAnimStudio.TaeEditor
             set
             {
                 _scrubbing = value;
+                IsFrameStepScrub = false;
                 if (_scrubbing)
                     IsTempPausedUntilAnimChange = false;
             }

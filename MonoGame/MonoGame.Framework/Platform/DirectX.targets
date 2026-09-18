@@ -13,6 +13,7 @@
     <Compile Include="Platform\Graphics\IRenderTarget.DirectX.cs" />
     <Compile Include="Platform\Graphics\OcclusionQuery.DirectX.cs" />
     <Compile Include="Platform\Graphics\RenderTarget2D.DirectX.cs" />
+    <Compile Include="Platform\Graphics\DepthSnapshot.DirectX.cs" />
     <Compile Include="Platform\Graphics\RenderTarget3D.DirectX.cs" />
     <Compile Include="Platform\Graphics\RenderTargetCube.DirectX.cs" />
     <Compile Include="Platform\Graphics\SamplerStateCollection.DirectX.cs" />

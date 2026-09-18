@@ -11,12 +11,74 @@ namespace DSAnimStudio
     {
         public static string[] ARGS;
         public static Main MainInstance;
+
+        // [Preview] 全局崩溃日志 —— 把任何未捕获异常写到 exe 同目录的 dsas_crash.log
+        // 这样 c0000.anibnd 闪退时不再静默退出，能拿到完整堆栈。
+        static string CrashLogPath
+        {
+            get
+            {
+                try { return System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dsas_crash.log"); }
+                catch { return "dsas_crash.log"; }
+            }
+        }
+
+        static void WriteCrashLog(string source, Exception ex)
+        {
+            try
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("==================================================================");
+                sb.AppendLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] DSAS Crash via {source}");
+                sb.AppendLine("==================================================================");
+                if (ex != null)
+                {
+                    int depth = 0;
+                    var cur = ex;
+                    while (cur != null && depth < 10)
+                    {
+                        sb.AppendLine($"-- Layer {depth}: {cur.GetType().FullName}");
+                        sb.AppendLine($"   Message: {cur.Message}");
+                        if (!string.IsNullOrEmpty(cur.StackTrace))
+                        {
+                            sb.AppendLine("   StackTrace:");
+                            sb.AppendLine(cur.StackTrace);
+                        }
+                        cur = cur.InnerException;
+                        depth++;
+                    }
+                }
+                else
+                {
+                    sb.AppendLine("(null exception)");
+                }
+                sb.AppendLine();
+                System.IO.File.AppendAllText(CrashLogPath, sb.ToString());
+            }
+            catch { /* never let the logger itself crash */ }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main(string[] args)
         {
+            // [Preview] 注册全局兜底
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                WriteCrashLog("AppDomain.UnhandledException", e.ExceptionObject as Exception);
+            };
+            Application.ThreadException += (s, e) =>
+            {
+                WriteCrashLog("Application.ThreadException", e.Exception);
+            };
+            System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                WriteCrashLog("TaskScheduler.UnobservedTaskException", e.Exception);
+                e.SetObserved();
+            };
+
 
             //SoulsFormatsNEXT TODO
             //SoulsFormats.DCX.LoadOodleAction = () =>
@@ -66,6 +128,20 @@ namespace DSAnimStudio
             try
             {
                 MainInstance.Run(Microsoft.Xna.Framework.GameRunBehavior.Synchronous);
+            }
+            // [Preview] 捕获 Run() 内的所有异常并写日志 + 弹对话框
+            catch (Exception ex)
+            {
+                WriteCrashLog("MainInstance.Run", ex);
+                try
+                {
+                    MessageBox.Show(
+                        $"DSAS crashed during runtime.\n\nA crash log has been written to:\n{CrashLogPath}\n\n" +
+                        $"Top-level exception: {ex.GetType().Name}\n{ex.Message}",
+                        "DSAS Crash",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch { /* swallow */ }
             }
             finally
             {
