@@ -508,7 +508,7 @@ namespace DSAnimStudio
                 }
                 else if (check.Contains(@"/CL/") || ResourceGameDetection.HasCompatibleProjectPrefix(check))
                 {
-                    // [Preview] NR 项目 c0000 主包内部路径前缀实测为 "<主包前缀>"（如 "W:\<主包前缀>\data\Target\INTERROOT_win64\..."），
+                    // [Preview] NR 项目 c0000 主包内部路径前缀实测为 "<主包前缀>"，
                     // 而 c0010~c1000 等夜民 anibnd 用 "/CL/"。两者都属于 ERNR（Elden Ring: Nightreign）。
                     ParentDocument.GameRoot.Init(bndPath, SoulsAssetPipeline.SoulsGames.ERNR, scratchFolder);
                     return true;

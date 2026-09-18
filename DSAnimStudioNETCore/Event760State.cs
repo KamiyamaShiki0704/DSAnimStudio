@@ -4,7 +4,7 @@ using SoulsAssetPipeline;
 
 namespace DSAnimStudio
 {
-    /// <summary>[Preview] Nightreign 1.3.0.0 native 760 horizontal arithmetic (0x141174CC0).
+    /// <summary>[Preview] Nightreign native 760 horizontal arithmetic.
     /// Event scheduling and preview guards remain separate from the native geometry.</summary>
     public sealed class Event760State
     {

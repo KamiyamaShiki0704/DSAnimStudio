@@ -303,7 +303,7 @@ namespace DSAnimStudio.TaeEditor
         public bool SimOption_NF_MoveRelative_UseCameraAsTarget = false;
 
         // ---- [Preview] Event 760 位移追踪缩放模拟 ----
-        // Nightreign 1.3.0.0 原生水平模式：到达角=0时 clamp(D-R, Min, Max)/ReferenceDist。
+        // Nightreign 原生水平模式：到达角=0时 clamp(D-R, Min, Max)/ReferenceDist。
         // 非零到达角参与到达点几何；请求位移经过碰撞后才得到实际位移。
         public bool RootMotionPreview_Enabled = true;
         public bool SimEnabled_Event760RootMotionBoost = true;

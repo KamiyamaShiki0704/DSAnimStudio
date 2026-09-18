@@ -33,14 +33,14 @@ namespace DSAnimStudio
         string error="",progress="",stage="",trace="";
         public string DiagnosticError=>stage+" "+error+" "+trace;
         public int ProcessId=>process.Id;
-        public static string DefaultRuntimePath=>Environment.GetEnvironmentVariable("DSA_HAVOK_CONTENT_TOOLS")??@"D:\.Havok\HavokContentTools";
+        public static string DefaultRuntimePath=>Environment.GetEnvironmentVariable("DSA_HAVOK_CONTENT_TOOLS");
         public NativeClothSession(NativeClothAsset asset,string runtimePath=null,string helperPath=null)
         {
             description=asset.Description;
             localPose=description.Skeletons.Select(s=>new float[s.Bones.Length*16]).ToArray();
             inversePose=description.Skeletons.Select(s=>new float[s.Bones.Length*16]).ToArray();
             runtimePath??=DefaultRuntimePath;helperPath??=Path.Combine(AppContext.BaseDirectory,"NativePhysics","DSA.NativePhysicsHost.exe");
-            if(!File.Exists(Path.Combine(runtimePath,"tools","hctPreviewPlugin.dll")))throw new FileNotFoundException("Havok Content Tools installation not found. Set DSA_HAVOK_CONTENT_TOOLS to its folder.");
+            if(string.IsNullOrWhiteSpace(runtimePath)||!File.Exists(Path.Combine(runtimePath,"tools","hctPreviewPlugin.dll")))throw new FileNotFoundException("Havok Content Tools installation not found. Set DSA_HAVOK_CONTENT_TOOLS to its folder.");
             if(!File.Exists(helperPath))throw new FileNotFoundException("DSA native physics helper is missing.");
             temporary=Path.Combine(Path.GetTempPath(),"DSA.NativePhysics",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temporary);
             string pipeName="DSA.NativePhysics."+Guid.NewGuid().ToString("N");
