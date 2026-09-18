@@ -1,0 +1,1897 @@
+{
+  "DS1R": {
+    "RowSize": 160,
+    "Fields": {
+      "life": {
+        "Offset": 16,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingstoprange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 72,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingoffsetrange": {
+        "Offset": 84,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 104,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 128,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 130,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 132,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 134,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 136,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 144,
+        "Type": "s8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 145,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ispenetrate": {
+        "Offset": 146,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "launchconditiontype": {
+        "Offset": 153,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 3
+      },
+      "emittepostype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "sfxid_bullet": {
+        "Offset": 4,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_hit": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  },
+  "BB": {
+    "RowSize": 160,
+    "Fields": {
+      "life": {
+        "Offset": 16,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingstoprange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 72,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingoffsetrange": {
+        "Offset": 84,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 104,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 128,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 130,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 132,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 134,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 136,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 144,
+        "Type": "s8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 145,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ispenetrate": {
+        "Offset": 146,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "launchconditiontype": {
+        "Offset": 153,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 3
+      },
+      "emittepostype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "isinheritspeedtochild": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 1
+      },
+      "sfxid_bullet": {
+        "Offset": 4,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_hit": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  },
+  "DS3": {
+    "RowSize": 256,
+    "Fields": {
+      "life": {
+        "Offset": 16,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingstoprange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 72,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 104,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 128,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 130,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 132,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 134,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 136,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 144,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 145,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ispenetrate": {
+        "Offset": 146,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "launchconditiontype": {
+        "Offset": 153,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 3
+      },
+      "emittepostype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "isinheritspeedtochild": {
+        "Offset": 195,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "isenableautohoming": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 4,
+        "Width": 1
+      },
+      "isowneroverrideinitangle": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 6,
+        "Width": 1
+      },
+      "targetyoffsetrange": {
+        "Offset": 160,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleymaxrandom": {
+        "Offset": 164,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexmaxrandom": {
+        "Offset": 168,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatebulletid": {
+        "Offset": 172,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemin": {
+        "Offset": 176,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemax": {
+        "Offset": 180,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatewaittime": {
+        "Offset": 188,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "launchtype": {
+        "Offset": 192,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "randomcreateradius": {
+        "Offset": 196,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "liferandomrange": {
+        "Offset": 204,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hominganglex": {
+        "Offset": 208,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxidbullet": {
+        "Offset": 4,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxidhit": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  },
+  "SDT": {
+    "RowSize": 256,
+    "Fields": {
+      "life": {
+        "Offset": 16,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingstoprange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 72,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingoffsetrange": {
+        "Offset": 84,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 104,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 128,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 130,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 132,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 134,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 136,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 144,
+        "Type": "s8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 145,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ispenetrate": {
+        "Offset": 146,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "launchconditiontype": {
+        "Offset": 153,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "ishowitzer": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 5,
+        "Width": 1
+      },
+      "isenableautohoming": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 4,
+        "Width": 1
+      },
+      "targetyoffsetrange": {
+        "Offset": 160,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleymaxrandom": {
+        "Offset": 164,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexmaxrandom": {
+        "Offset": 168,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatebulletid": {
+        "Offset": 172,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemin": {
+        "Offset": 176,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemax": {
+        "Offset": 180,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatewaittime": {
+        "Offset": 188,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxposturetype": {
+        "Offset": 192,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "isinheritspeedtochild": {
+        "Offset": 195,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "randomcreateradius": {
+        "Offset": 196,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "liferandomrange": {
+        "Offset": 204,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hominganglex": {
+        "Offset": 218,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "emittepostype": {
+        "Offset": 242,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_bullet": {
+        "Offset": 4,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_hit": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  },
+  "ER": {
+    "RowSize": 272,
+    "Fields": {
+      "life": {
+        "Offset": 16,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingstoprange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 72,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingoffsetrange": {
+        "Offset": 84,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 104,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 128,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 130,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 132,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 134,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 136,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 144,
+        "Type": "s8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 145,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ispenetratechr": {
+        "Offset": 152,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "launchconditiontype": {
+        "Offset": 153,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 3
+      },
+      "emittepostype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "isenableautohoming": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 4,
+        "Width": 1
+      },
+      "isowneroverrideinitangle": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 6,
+        "Width": 1
+      },
+      "targetyoffsetrange": {
+        "Offset": 160,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleymaxrandom": {
+        "Offset": 164,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexmaxrandom": {
+        "Offset": 168,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatebulletid": {
+        "Offset": 172,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemin": {
+        "Offset": 176,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemax": {
+        "Offset": 180,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatewaittime": {
+        "Offset": 188,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxposturetype": {
+        "Offset": 192,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "isinheritspeedtochild": {
+        "Offset": 195,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "randomcreateradius": {
+        "Offset": 196,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "liferandomrange": {
+        "Offset": 208,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hominganglex": {
+        "Offset": 212,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ballisticcalctype": {
+        "Offset": 214,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_bullet": {
+        "Offset": 4,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_hit": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  },
+  "ERNR": {
+    "RowSize": 348,
+    "Fields": {
+      "life": {
+        "Offset": 16,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingstoprange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 72,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingoffsetrange": {
+        "Offset": 84,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 104,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 128,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 130,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 132,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 134,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 136,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 144,
+        "Type": "s8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 145,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ispenetratechr": {
+        "Offset": 152,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "launchconditiontype": {
+        "Offset": 153,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 3
+      },
+      "emittepostype": {
+        "Offset": 154,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 155,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "isenableautohoming": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 4,
+        "Width": 1
+      },
+      "isowneroverrideinitangle": {
+        "Offset": 156,
+        "Type": "u8",
+        "Bit": 6,
+        "Width": 1
+      },
+      "targetyoffsetrange": {
+        "Offset": 160,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleymaxrandom": {
+        "Offset": 164,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexmaxrandom": {
+        "Offset": 168,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatebulletid": {
+        "Offset": 172,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemin": {
+        "Offset": 176,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemax": {
+        "Offset": 180,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatewaittime": {
+        "Offset": 188,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxposturetype": {
+        "Offset": 192,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "isinheritspeedtochild": {
+        "Offset": 195,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "randomcreateradius": {
+        "Offset": 196,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "liferandomrange": {
+        "Offset": 208,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hominganglex": {
+        "Offset": 212,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "ballisticcalctype": {
+        "Offset": 214,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_bullet": {
+        "Offset": 4,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_hit": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  },
+  "AC6": {
+    "RowSize": 888,
+    "Fields": {
+      "life": {
+        "Offset": 20,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "dist": {
+        "Offset": 24,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lifeaddrand": {
+        "Offset": 28,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityinrange": {
+        "Offset": 32,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "gravityoutrange": {
+        "Offset": 36,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingstoprange": {
+        "Offset": 40,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "initvellocity": {
+        "Offset": 44,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "accelinrange": {
+        "Offset": 48,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceloutrange": {
+        "Offset": 52,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "maxvellocity": {
+        "Offset": 56,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "minvellocity": {
+        "Offset": 60,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "acceltime": {
+        "Offset": 64,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegindist": {
+        "Offset": 68,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradius": {
+        "Offset": 76,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusmax": {
+        "Offset": 80,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitradiusformap": {
+        "Offset": 84,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "spreadtime": {
+        "Offset": 92,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hormingoffsetrange": {
+        "Offset": 100,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "externalforce": {
+        "Offset": 108,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "hitbulletid": {
+        "Offset": 120,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numshoot": {
+        "Offset": 144,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingangle": {
+        "Offset": 146,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangle": {
+        "Offset": 148,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleinterval": {
+        "Offset": 150,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexinterval": {
+        "Offset": 152,
+        "Type": "s16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexz": {
+        "Offset": 160,
+        "Type": "s8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lockshootlimitang": {
+        "Offset": 161,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "charapenetratetype": {
+        "Offset": 162,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "launchconditiontype": {
+        "Offset": 169,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "emittepostype": {
+        "Offset": 170,
+        "Type": "u8",
+        "Bit": 3,
+        "Width": 3
+      },
+      "ispenetratemap": {
+        "Offset": 171,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 1
+      },
+      "ishowitzer": {
+        "Offset": 171,
+        "Type": "u8",
+        "Bit": 4,
+        "Width": 1
+      },
+      "isenableautohoming": {
+        "Offset": 172,
+        "Type": "u8",
+        "Bit": 4,
+        "Width": 1
+      },
+      "targetyoffsetrange": {
+        "Offset": 176,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootangleymaxrandom": {
+        "Offset": 180,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootanglexmaxrandom": {
+        "Offset": 184,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatebulletid": {
+        "Offset": 188,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemin": {
+        "Offset": 192,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatetimemax": {
+        "Offset": 196,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatewaittime": {
+        "Offset": 204,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxposturetype": {
+        "Offset": 208,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "isinheritspeedtochild": {
+        "Offset": 209,
+        "Type": "u8",
+        "Bit": 1,
+        "Width": 1
+      },
+      "shapetype": {
+        "Offset": 211,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "randomcreateradius": {
+        "Offset": 212,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "homingbegintime": {
+        "Offset": 220,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shotgunparamid": {
+        "Offset": 268,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootdmypolyid": {
+        "Offset": 464,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "shootinterval": {
+        "Offset": 488,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "intervalcreatebulletmax": {
+        "Offset": 516,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "followtype": {
+        "Offset": 634,
+        "Type": "u8",
+        "Bit": 0,
+        "Width": 0
+      },
+      "lifemovedist": {
+        "Offset": 772,
+        "Type": "f32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "numcontinueshoot": {
+        "Offset": 496,
+        "Type": "u16",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_bullet": {
+        "Offset": 8,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      },
+      "sfxid_hit": {
+        "Offset": 12,
+        "Type": "s32",
+        "Bit": 0,
+        "Width": 0
+      }
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "DS1R": {
+    "RowSize": 50,
+    "MotionTypeOffset": 37,
+    "Slots": [
+      {
+        "IdOffset": 10,
+        "IdSize": 2,
+        "CategoryOffset": 35
+      }
+    ],
+    "SfxOffsets": [
+      -1,
+      -1,
+      -1
+    ]
+  },
+  "BB": {
+    "RowSize": 50,
+    "MotionTypeOffset": 37,
+    "Slots": [
+      {
+        "IdOffset": 10,
+        "IdSize": 2,
+        "CategoryOffset": 35
+      }
+    ],
+    "SfxOffsets": [
+      -1,
+      -1,
+      -1
+    ]
+  },
+  "DS3": {
+    "RowSize": 130,
+    "MotionTypeOffset": 37,
+    "Slots": [
+      {
+        "IdOffset": 100,
+        "IdSize": 4,
+        "CategoryOffset": 35
+      },
+      {
+        "IdOffset": 104,
+        "IdSize": 4,
+        "CategoryOffset": 69
+      },
+      {
+        "IdOffset": 108,
+        "IdSize": 4,
+        "CategoryOffset": 93
+      },
+      {
+        "IdOffset": 112,
+        "IdSize": 4,
+        "CategoryOffset": 39
+      }
+    ],
+    "SfxOffsets": [
+      48,
+      52,
+      56
+    ]
+  },
+  "SDT": {
+    "RowSize": 114,
+    "MotionTypeOffset": 37,
+    "Slots": [
+      {
+        "IdOffset": 100,
+        "IdSize": 4,
+        "CategoryOffset": 35
+      },
+      {
+        "IdOffset": 104,
+        "IdSize": 4,
+        "CategoryOffset": 69
+      },
+      {
+        "IdOffset": 108,
+        "IdSize": 4,
+        "CategoryOffset": 93
+      }
+    ],
+    "SfxOffsets": [
+      48,
+      52,
+      56
+    ]
+  },
+  "ER": {
+    "RowSize": 170,
+    "MotionTypeOffset": 41,
+    "Slots": [
+      {
+        "IdOffset": 104,
+        "IdSize": 4,
+        "CategoryOffset": 30
+      },
+      {
+        "IdOffset": 108,
+        "IdSize": 4,
+        "CategoryOffset": 32
+      },
+      {
+        "IdOffset": 112,
+        "IdSize": 4,
+        "CategoryOffset": 39
+      },
+      {
+        "IdOffset": 120,
+        "IdSize": 4,
+        "CategoryOffset": 43
+      },
+      {
+        "IdOffset": 124,
+        "IdSize": 4,
+        "CategoryOffset": 73
+      },
+      {
+        "IdOffset": 128,
+        "IdSize": 4,
+        "CategoryOffset": 97
+      },
+      {
+        "IdOffset": 132,
+        "IdSize": 4,
+        "CategoryOffset": 100
+      },
+      {
+        "IdOffset": 136,
+        "IdSize": 4,
+        "CategoryOffset": 101
+      },
+      {
+        "IdOffset": 140,
+        "IdSize": 4,
+        "CategoryOffset": 102
+      },
+      {
+        "IdOffset": 144,
+        "IdSize": 4,
+        "CategoryOffset": 103
+      }
+    ],
+    "SfxOffsets": [
+      52,
+      56,
+      60
+    ]
+  },
+  "ERNR": {
+    "RowSize": 174,
+    "MotionTypeOffset": 41,
+    "Slots": [
+      {
+        "IdOffset": 104,
+        "IdSize": 4,
+        "CategoryOffset": 30
+      },
+      {
+        "IdOffset": 108,
+        "IdSize": 4,
+        "CategoryOffset": 32
+      },
+      {
+        "IdOffset": 112,
+        "IdSize": 4,
+        "CategoryOffset": 39
+      },
+      {
+        "IdOffset": 120,
+        "IdSize": 4,
+        "CategoryOffset": 43
+      },
+      {
+        "IdOffset": 124,
+        "IdSize": 4,
+        "CategoryOffset": 73
+      },
+      {
+        "IdOffset": 128,
+        "IdSize": 4,
+        "CategoryOffset": 97
+      },
+      {
+        "IdOffset": 132,
+        "IdSize": 4,
+        "CategoryOffset": 100
+      },
+      {
+        "IdOffset": 136,
+        "IdSize": 4,
+        "CategoryOffset": 101
+      },
+      {
+        "IdOffset": 140,
+        "IdSize": 4,
+        "CategoryOffset": 102
+      },
+      {
+        "IdOffset": 144,
+        "IdSize": 4,
+        "CategoryOffset": 103
+      }
+    ],
+    "SfxOffsets": [
+      52,
+      56,
+      60
+    ]
+  },
+  "AC6": {
+    "RowSize": 82,
+    "MotionTypeOffset": 37,
+    "Slots": [
+      {
+        "IdOffset": 10,
+        "IdSize": 2,
+        "CategoryOffset": 35
+      }
+    ],
+    "SfxOffsets": [
+      48,
+      52,
+      56
+    ]
+  }
+}
