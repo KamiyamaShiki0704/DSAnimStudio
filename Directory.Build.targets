@@ -1,0 +1,7 @@
+<Project>
+  <!-- Apply after nested dependency props as well, including MonoGame. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <PathMap>$(MSBuildThisFileDirectory)=/_/src/</PathMap>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
